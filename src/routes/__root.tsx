@@ -77,14 +77,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Market Intelligence Suite" },
+      { name: "description", content: "AI-powered competitor analysis, SaaS audit, and pricing/ROI calculators for founders and product teams." },
+      { name: "author", content: "Market Intelligence Suite" },
+      { property: "og:title", content: "Market Intelligence Suite" },
+      { property: "og:description", content: "AI-powered competitor analysis, SaaS audit, and pricing/ROI calculators." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
