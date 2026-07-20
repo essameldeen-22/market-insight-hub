@@ -59,8 +59,7 @@ export async function analyzeReviews(productName: string, reviews: string[]): Pr
   });
 
   const text = response.content
-    .filter((b): b is Extract<typeof b, { type: "text" }> => b.type === "text")
-    .map((b) => b.text)
+    .map((b) => (b.type === "text" ? b.text : ""))
     .join("")
     .trim();
 
