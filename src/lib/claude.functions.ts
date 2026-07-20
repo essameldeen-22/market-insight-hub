@@ -20,7 +20,7 @@ export const analyzeReviewsFn = createServerFn({ method: "POST" })
         user_id: context.userId,
         product_name: data.productName,
         reviews_text: data.reviews.join("\n"),
-        result: result as unknown as Record<string, unknown>,
+        result: result as unknown as never,
       });
     } catch (e) {
       // Persistence failures shouldn't block returning the result to the user.
