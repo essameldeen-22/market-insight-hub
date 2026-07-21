@@ -15,6 +15,6 @@ export function formatMoney(usdAmount: number, currency: Currency = "USD"): stri
   const cfg = CURRENCIES.find((c) => c.code === currency) ?? CURRENCIES[0];
   const converted = usdAmount * cfg.rate;
   const rounded = Math.round(converted);
-  const withCommas = rounded.toLocaleString("en-US");
+  const withCommas = new Intl.NumberFormat("en-US", { numberingSystem: "latn", maximumFractionDigits: 0 }).format(rounded);
   return `${cfg.symbol}${withCommas}`;
 }
