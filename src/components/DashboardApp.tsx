@@ -745,7 +745,12 @@ export function DashboardApp() {
           <select className="nav-btn" value={currency} onChange={(e) => setCurrency(e.target.value as Currency)} title={t("currency.label")}>
             {CURRENCIES.map((c) => <option key={c.code} value={c.code}>{c.symbol} {c.code}</option>)}
           </select>
-          <button className="nav-btn" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>{theme === "dark" ? "☀️" : "🌙"}<span>{t("nav.theme")}</span></button>
+          <select className="nav-btn" value={theme} onChange={(e) => setTheme(e.target.value as "dark" | "light" | "auto")} title={t("nav.theme")}>
+            <option value="dark">🌙 {t("theme.dark")}</option>
+            <option value="light">☀️ {t("theme.light")}</option>
+            <option value="auto">🖥️ {t("theme.auto")}</option>
+          </select>
+
           <button className="nav-btn" onClick={() => setLang(lang === "ar" ? "en" : "ar")}>{t("nav.language")}</button>
           <button className="nav-btn" onClick={signOut}>{t("nav.signout")}</button>
         </div>
