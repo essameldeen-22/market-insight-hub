@@ -62,7 +62,7 @@ function Card({ title, children, right }: { title?: React.ReactNode; children: R
 interface Competitor { id: string; name: string; reviews: string; result?: AnalysisResult; loading?: boolean; error?: string; }
 
 function CompetitorAnalysis() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const analyze = useServerFn(analyzeReviewsFn);
   const [products, setProducts] = useState<Competitor[]>([
     { id: crypto.randomUUID(), name: "", reviews: "" },
@@ -87,21 +87,36 @@ function CompetitorAnalysis() {
     }
   };
 
+  const DEMO_AR = [
+    "الصوت رائع جداً لكن البطارية ضعيفة بعد 3 شهور استخدام",
+    "مريحة في الاستخدام لفترات طويلة، الجودة ممتازة",
+    "الاتصال بينقطع كتير مع الموبايل، مشكلة كبيرة",
+    "التصميم أنيق والصوت واضح جداً، أنصح بها",
+    "السعر مرتفع مقابل جودة البناء البلاستيكية",
+    "البطارية بتفضل شغالة يوم كامل بشحنة واحدة",
+    "المقاس مناسب والعزل الصوتي ممتاز في الشارع",
+    "خاصية إلغاء الضوضاء ضعيفة مقارنة بالسعر",
+    "التوصيل سريع والتغليف احترافي جداً",
+    "جودة الميكروفون في المكالمات متوسطة",
+  ];
+  const DEMO_EN = [
+    "Battery lasts a full day on a single charge, love it",
+    "Bluetooth keeps disconnecting when I move around",
+    "Design is sleek and the fit is comfortable",
+    "Sound quality is excellent for the price",
+    "Build quality feels cheap for the price tag",
+    "Noise cancellation is weaker than advertised",
+    "Very comfortable for long listening sessions",
+    "Microphone quality on calls is just average",
+    "Fast shipping and premium packaging",
+    "Price is too high for plastic build quality",
+  ];
   const loadDemo = (id: string) => {
-    const demo = [
-      "الصوت رائع جداً لكن البطارية ضعيفة بعد ٣ شهور استخدام",
-      "مريحة في الاستخدام لفترات طويلة، الجودة ممتازة",
-      "الاتصال بينقطع كتير مع الموبايل، مشكلة كبيرة",
-      "التصميم أنيق والصوت واضح جداً، أنصح بها",
-      "السعر مرتفع مقابل جودة البناء البلاستيكية",
-      "Battery lasts a full day on a single charge, love it",
-      "Bluetooth keeps disconnecting when I move around",
-      "Design is sleek and the fit is comfortable",
-      "Sound quality is excellent for the price",
-      "Build quality feels cheap for the price tag",
-    ].join("\n");
-    setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, reviews: demo, name: p.name || "Sample Product" } : p)));
+    const demo = (lang === "ar" ? DEMO_AR : DEMO_EN).join("\n");
+    const sampleName = lang === "ar" ? "منتج تجريبي" : "Sample Product";
+    setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, reviews: demo, name: p.name || sampleName } : p)));
   };
+
 
   return (
     <div>
