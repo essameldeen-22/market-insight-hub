@@ -62,7 +62,7 @@ function Card({ title, children, right }: { title?: React.ReactNode; children: R
 interface Competitor { id: string; name: string; reviews: string; result?: AnalysisResult; loading?: boolean; error?: string; }
 
 function CompetitorAnalysis() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const analyze = useServerFn(analyzeReviewsFn);
   const [products, setProducts] = useState<Competitor[]>([
     { id: crypto.randomUUID(), name: "", reviews: "" },
@@ -87,21 +87,36 @@ function CompetitorAnalysis() {
     }
   };
 
+  const DEMO_AR = [
+    "الصوت رائع جداً لكن البطارية ضعيفة بعد 3 شهور استخدام",
+    "مريحة في الاستخدام لفترات طويلة، الجودة ممتازة",
+    "الاتصال بينقطع كتير مع الموبايل، مشكلة كبيرة",
+    "التصميم أنيق والصوت واضح جداً، أنصح بها",
+    "السعر مرتفع مقابل جودة البناء البلاستيكية",
+    "البطارية بتفضل شغالة يوم كامل بشحنة واحدة",
+    "المقاس مناسب والعزل الصوتي ممتاز في الشارع",
+    "خاصية إلغاء الضوضاء ضعيفة مقارنة بالسعر",
+    "التوصيل سريع والتغليف احترافي جداً",
+    "جودة الميكروفون في المكالمات متوسطة",
+  ];
+  const DEMO_EN = [
+    "Battery lasts a full day on a single charge, love it",
+    "Bluetooth keeps disconnecting when I move around",
+    "Design is sleek and the fit is comfortable",
+    "Sound quality is excellent for the price",
+    "Build quality feels cheap for the price tag",
+    "Noise cancellation is weaker than advertised",
+    "Very comfortable for long listening sessions",
+    "Microphone quality on calls is just average",
+    "Fast shipping and premium packaging",
+    "Price is too high for plastic build quality",
+  ];
   const loadDemo = (id: string) => {
-    const demo = [
-      "الصوت رائع جداً لكن البطارية ضعيفة بعد ٣ شهور استخدام",
-      "مريحة في الاستخدام لفترات طويلة، الجودة ممتازة",
-      "الاتصال بينقطع كتير مع الموبايل، مشكلة كبيرة",
-      "التصميم أنيق والصوت واضح جداً، أنصح بها",
-      "السعر مرتفع مقابل جودة البناء البلاستيكية",
-      "Battery lasts a full day on a single charge, love it",
-      "Bluetooth keeps disconnecting when I move around",
-      "Design is sleek and the fit is comfortable",
-      "Sound quality is excellent for the price",
-      "Build quality feels cheap for the price tag",
-    ].join("\n");
-    setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, reviews: demo, name: p.name || "Sample Product" } : p)));
+    const demo = (lang === "ar" ? DEMO_AR : DEMO_EN).join("\n");
+    const sampleName = lang === "ar" ? "منتج تجريبي" : "Sample Product";
+    setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, reviews: demo, name: p.name || sampleName } : p)));
   };
+
 
   return (
     <div>
@@ -672,13 +687,25 @@ export function DashboardApp() {
   const { t, lang, setLang } = useI18n();
   const [active, setActive] = useState<ModuleKey>("competitor");
   const [currency, setCurrency] = useState<Currency>(() => (typeof window !== "undefined" && (localStorage.getItem("mis_currency") as Currency)) || "USD");
-  const [theme, setTheme] = useState<"dark" | "light">(() => (typeof window !== "undefined" && (localStorage.getItem("mis_theme") as "dark" | "light")) || "dark");
+  const [theme, setTheme] = useState<"dark" | "light" | "auto">(() => (typeof window !== "undefined" && (localStorage.getItem("mis_theme") as "dark" | "light" | "auto")) || "dark");
 
   useEffect(() => {
     if (typeof document === "undefined") return;
-    document.body.classList.toggle("light-mode", theme === "light");
+    const apply = () => {
+      const resolved = theme === "auto"
+        ? (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark")
+        : theme;
+      document.body.classList.toggle("light-mode", resolved === "light");
+    };
+    apply();
     localStorage.setItem("mis_theme", theme);
+    if (theme === "auto") {
+      const mq = window.matchMedia("(prefers-color-scheme: light)");
+      mq.addEventListener("change", apply);
+      return () => mq.removeEventListener("change", apply);
+    }
   }, [theme]);
+
   useEffect(() => { if (typeof window !== "undefined") localStorage.setItem("mis_currency", currency); }, [currency]);
 
   // Keyboard shortcuts: Alt+1..4 to switch modules
@@ -718,7 +745,12 @@ export function DashboardApp() {
           <select className="nav-btn" value={currency} onChange={(e) => setCurrency(e.target.value as Currency)} title={t("currency.label")}>
             {CURRENCIES.map((c) => <option key={c.code} value={c.code}>{c.symbol} {c.code}</option>)}
           </select>
-          <button className="nav-btn" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>{theme === "dark" ? "☀️" : "🌙"}<span>{t("nav.theme")}</span></button>
+          <select className="nav-btn" value={theme} onChange={(e) => setTheme(e.target.value as "dark" | "light" | "auto")} title={t("nav.theme")}>
+            <option value="dark">🌙 {t("theme.dark")}</option>
+            <option value="light">☀️ {t("theme.light")}</option>
+            <option value="auto">🖥️ {t("theme.auto")}</option>
+          </select>
+
           <button className="nav-btn" onClick={() => setLang(lang === "ar" ? "en" : "ar")}>{t("nav.language")}</button>
           <button className="nav-btn" onClick={signOut}>{t("nav.signout")}</button>
         </div>

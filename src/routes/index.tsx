@@ -52,6 +52,9 @@ function Landing() {
           <span>Market Intelligence</span>
         </div>
         <div className="nav-actions">
+          <Link to="/value" className="nav-btn">{t("nav.marketing.value")}</Link>
+          <Link to="/pricing" className="nav-btn">{t("nav.marketing.pricing")}</Link>
+          <Link to="/about" className="nav-btn">{t("nav.marketing.about")}</Link>
           <button className="nav-btn" onClick={() => setLang(lang === "ar" ? "en" : "ar")}>{t("nav.language")}</button>
           {signedIn ? (
             <Link to="/app" className="nav-btn primary">{t("nav.app")}</Link>
@@ -62,6 +65,7 @@ function Landing() {
             </>
           )}
         </div>
+
       </nav>
 
       <section className="hero">
