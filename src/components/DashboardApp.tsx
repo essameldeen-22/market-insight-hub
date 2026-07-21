@@ -687,13 +687,25 @@ export function DashboardApp() {
   const { t, lang, setLang } = useI18n();
   const [active, setActive] = useState<ModuleKey>("competitor");
   const [currency, setCurrency] = useState<Currency>(() => (typeof window !== "undefined" && (localStorage.getItem("mis_currency") as Currency)) || "USD");
-  const [theme, setTheme] = useState<"dark" | "light">(() => (typeof window !== "undefined" && (localStorage.getItem("mis_theme") as "dark" | "light")) || "dark");
+  const [theme, setTheme] = useState<"dark" | "light" | "auto">(() => (typeof window !== "undefined" && (localStorage.getItem("mis_theme") as "dark" | "light" | "auto")) || "dark");
 
   useEffect(() => {
     if (typeof document === "undefined") return;
-    document.body.classList.toggle("light-mode", theme === "light");
+    const apply = () => {
+      const resolved = theme === "auto"
+        ? (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark")
+        : theme;
+      document.body.classList.toggle("light-mode", resolved === "light");
+    };
+    apply();
     localStorage.setItem("mis_theme", theme);
+    if (theme === "auto") {
+      const mq = window.matchMedia("(prefers-color-scheme: light)");
+      mq.addEventListener("change", apply);
+      return () => mq.removeEventListener("change", apply);
+    }
   }, [theme]);
+
   useEffect(() => { if (typeof window !== "undefined") localStorage.setItem("mis_currency", currency); }, [currency]);
 
   // Keyboard shortcuts: Alt+1..4 to switch modules
