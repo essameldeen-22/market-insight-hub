@@ -143,12 +143,100 @@ function Card({ title, children, right }: { title?: React.ReactNode; children: R
 // --- Competitor Analysis ---------------------------------------------------
 interface Competitor { id: string; name: string; reviews: string; result?: AnalysisResult; loading?: boolean; error?: string; }
 
+// Per-language demo datasets with product-name variants per slot (bug #4).
+const COMPETITOR_DEMOS: Record<"ar" | "en", { name: string; reviews: string[] }[]> = {
+  ar: [
+    {
+      name: "سماعات بلوتوث XYZ",
+      reviews: [
+        "الصوت رائع جداً لكن البطارية ضعيفة بعد 3 شهور استخدام",
+        "مريحة في الاستخدام لفترات طويلة، الجودة ممتازة",
+        "الاتصال بينقطع كتير مع الموبايل، مشكلة كبيرة",
+        "التصميم أنيق والصوت واضح جداً، أنصح بها",
+        "السعر مرتفع مقابل جودة البناء البلاستيكية",
+        "البطارية بتفضل شغالة يوم كامل بشحنة واحدة",
+        "المقاس مناسب والعزل الصوتي ممتاز في الشارع",
+        "خاصية إلغاء الضوضاء ضعيفة مقارنة بالسعر",
+        "التوصيل سريع والتغليف احترافي جداً",
+        "جودة الميكروفون في المكالمات متوسطة",
+      ],
+    },
+    {
+      name: "ساعة ذكية ABC",
+      reviews: [
+        "الشاشة واضحة تحت الشمس بشكل ممتاز",
+        "التطبيق بطيء ومليان bugs، محتاج تحديث",
+        "دقة قياس النبض ممتازة أثناء الجري",
+        "بتفصل عن الموبايل كل شوية",
+        "التصميم أنيق ومناسب للاستخدام اليومي",
+        "البطارية بتكفي 5 أيام فعلاً",
+        "السعر أعلى من المنافسين بدون مبرر",
+        "خاصية GPS دقيقة جداً",
+      ],
+    },
+    {
+      name: "لابتوب DEF Pro",
+      reviews: [
+        "الأداء ممتاز في تشغيل البرامج الثقيلة",
+        "بيسخن جداً بعد ساعة استخدام",
+        "لوحة المفاتيح مريحة والإضاءة رائعة",
+        "المروحة صوتها عالي في الألعاب",
+        "الشاشة ألوانها دقيقة ومناسبة للتصميم",
+        "الوزن ثقيل جداً للحمل اليومي",
+      ],
+    },
+  ],
+  en: [
+    {
+      name: "XYZ Bluetooth Headphones",
+      reviews: [
+        "Battery lasts a full day on a single charge, love it",
+        "Bluetooth keeps disconnecting when I move around",
+        "Design is sleek and the fit is comfortable",
+        "Sound quality is excellent for the price",
+        "Build quality feels cheap for the price tag",
+        "Noise cancellation is weaker than advertised",
+        "Very comfortable for long listening sessions",
+        "Microphone quality on calls is just average",
+        "Fast shipping and premium packaging",
+        "Price is too high for plastic build quality",
+      ],
+    },
+    {
+      name: "ABC Smart Watch",
+      reviews: [
+        "Screen is perfectly readable in sunlight",
+        "Companion app is slow and full of bugs",
+        "Heart-rate tracking is very accurate while running",
+        "Disconnects from my phone constantly",
+        "Sleek design, works well for daily wear",
+        "Battery genuinely lasts 5 days",
+        "Priced higher than competitors without clear reason",
+        "GPS is spot on",
+      ],
+    },
+    {
+      name: "DEF Pro Laptop",
+      reviews: [
+        "Handles heavy workloads without a stutter",
+        "Runs very hot after about an hour of use",
+        "Keyboard is comfortable and backlighting is great",
+        "Fan noise is loud under gaming load",
+        "Colors on the display are accurate, great for design",
+        "Too heavy to carry around every day",
+      ],
+    },
+  ],
+};
+
 function CompetitorAnalysis() {
   const { t, lang } = useI18n();
   const analyze = useServerFn(analyzeReviewsFn);
   const [products, setProducts] = useState<Competitor[]>([
     { id: crypto.randomUUID(), name: "", reviews: "" },
   ]);
+  const reportRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [exporting, setExporting] = useState<string | null>(null);
 
   const runAnalyze = async (id: string) => {
     setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, loading: true, error: undefined } : p)));
@@ -169,36 +257,23 @@ function CompetitorAnalysis() {
     }
   };
 
-  const DEMO_AR = [
-    "الصوت رائع جداً لكن البطارية ضعيفة بعد 3 شهور استخدام",
-    "مريحة في الاستخدام لفترات طويلة، الجودة ممتازة",
-    "الاتصال بينقطع كتير مع الموبايل، مشكلة كبيرة",
-    "التصميم أنيق والصوت واضح جداً، أنصح بها",
-    "السعر مرتفع مقابل جودة البناء البلاستيكية",
-    "البطارية بتفضل شغالة يوم كامل بشحنة واحدة",
-    "المقاس مناسب والعزل الصوتي ممتاز في الشارع",
-    "خاصية إلغاء الضوضاء ضعيفة مقارنة بالسعر",
-    "التوصيل سريع والتغليف احترافي جداً",
-    "جودة الميكروفون في المكالمات متوسطة",
-  ];
-  const DEMO_EN = [
-    "Battery lasts a full day on a single charge, love it",
-    "Bluetooth keeps disconnecting when I move around",
-    "Design is sleek and the fit is comfortable",
-    "Sound quality is excellent for the price",
-    "Build quality feels cheap for the price tag",
-    "Noise cancellation is weaker than advertised",
-    "Very comfortable for long listening sessions",
-    "Microphone quality on calls is just average",
-    "Fast shipping and premium packaging",
-    "Price is too high for plastic build quality",
-  ];
-  const loadDemo = (id: string) => {
-    const demo = (lang === "ar" ? DEMO_AR : DEMO_EN).join("\n");
-    const sampleName = lang === "ar" ? "منتج تجريبي" : "Sample Product";
-    setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, reviews: demo, name: p.name || sampleName } : p)));
+  const loadDemo = (id: string, idx: number) => {
+    const dataset = COMPETITOR_DEMOS[lang];
+    const pick = dataset[idx % dataset.length];
+    setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, name: pick.name, reviews: pick.reviews.join("\n") } : p)));
   };
 
+  const exportPdf = async (id: string, name: string) => {
+    const el = reportRefs.current[id];
+    if (!el) return;
+    try {
+      setExporting(id);
+      const safe = (name || "competitor-analysis").replace(/[^\w\u0621-\u064A -]/g, "_").slice(0, 60);
+      await exportElementToPdf(el, `${safe}.pdf`);
+    } finally {
+      setExporting(null);
+    }
+  };
 
   return (
     <div>
@@ -212,7 +287,7 @@ function CompetitorAnalysis() {
       </div>
 
       {products.map((p, idx) => (
-        <div key={p.id} className="dashboard-grid" style={{ marginBottom: "2rem" }}>
+        <div key={p.id} className="dashboard-grid" style={{ marginBottom: "2rem" }} ref={(el) => { reportRefs.current[p.id] = el; }}>
           <div className="left-col">
             <Card
               title={
@@ -240,9 +315,14 @@ function CompetitorAnalysis() {
                 <button className="btn btn-primary" onClick={() => runAnalyze(p.id)} disabled={p.loading}>
                   {p.loading ? t("panels.competitor.analyzing") : t("panels.competitor.analyze")}
                 </button>
-                <button className="btn btn-outline" onClick={() => loadDemo(p.id)} disabled={p.loading}>
+                <button className="btn btn-outline" onClick={() => loadDemo(p.id, idx)} disabled={p.loading}>
                   {t("panels.competitor.demo")}
                 </button>
+                {p.result && (
+                  <button className="btn btn-outline" onClick={() => exportPdf(p.id, p.name)} disabled={exporting === p.id}>
+                    📄 {exporting === p.id ? "…" : t("panels.competitor.export_pdf")}
+                  </button>
+                )}
               </div>
               {p.error && <div className="insight-box danger" style={{ marginTop: "1rem" }}>{p.error}</div>}
               {p.loading && (
