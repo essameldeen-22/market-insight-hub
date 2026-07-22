@@ -29,6 +29,7 @@ import {
   type PricingState,
   type RoiState,
 } from "@/lib/persistence.functions";
+import { deleteMyAccount } from "@/lib/account.functions";
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Filler, Title);
 
@@ -41,6 +42,87 @@ function useDebouncedEffect(effect: () => void, deps: unknown[], delay = 600) {
     return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [...deps, delay]);
+}
+
+// --- PDF export (html2canvas + jsPDF, lazy-loaded to keep initial bundle slim) ---
+async function exportElementToPdf(el: HTMLElement, filename: string) {
+  const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+    import("html2canvas"),
+    import("jspdf"),
+  ]);
+  const canvas = await html2canvas(el, { backgroundColor: "#0a0a0f", scale: 2, useCORS: true });
+  const img = canvas.toDataURL("image/png");
+  const pdf = new jsPDF({ orientation: "p", unit: "pt", format: "a4" });
+  const pageW = pdf.internal.pageSize.getWidth();
+  const pageH = pdf.internal.pageSize.getHeight();
+  const ratio = Math.min(pageW / canvas.width, pageH / canvas.height);
+  const w = canvas.width * ratio;
+  const h = canvas.height * ratio;
+  pdf.addImage(img, "PNG", (pageW - w) / 2, 20, w, h);
+  pdf.save(filename);
+}
+
+// --- CSV parser (bank/card statement style: description + amount columns) ---
+function parseCsvToTools(text: string): SaasTool[] {
+  const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  if (lines.length === 0) return [];
+  const splitRow = (line: string): string[] => {
+    // Minimal CSV: handles quoted fields with commas.
+    const out: string[] = [];
+    let cur = "";
+    let inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') { inQ = !inQ; continue; }
+      if (c === "," && !inQ) { out.push(cur); cur = ""; continue; }
+      cur += c;
+    }
+    out.push(cur);
+    return out.map((s) => s.trim());
+  };
+  const header = splitRow(lines[0]).map((h) => h.toLowerCase());
+  const descIdx = header.findIndex((h) => /vendor|description|merchant|payee|name|memo|narrative/.test(h));
+  const amtIdx = header.findIndex((h) => /amount|debit|charge|price|cost|total/.test(h));
+  const hasHeader = descIdx !== -1 && amtIdx !== -1;
+  const startRow = hasHeader ? 1 : 0;
+  const tools: SaasTool[] = [];
+  const seen = new Map<string, SaasTool>();
+  for (let i = startRow; i < lines.length; i++) {
+    const cols = splitRow(lines[i]);
+    let name = "";
+    let cost = 0;
+    if (hasHeader) {
+      name = cols[descIdx] ?? "";
+      cost = Math.abs(Number(String(cols[amtIdx] ?? "").replace(/[^0-9.\-]/g, ""))) || 0;
+    } else {
+      // Heuristic: first non-numeric col = name, first numeric-looking col = amount.
+      for (const c of cols) {
+        const n = Number(String(c).replace(/[^0-9.\-]/g, ""));
+        if (!name && !Number.isFinite(n)) name = c;
+        else if (!name && (c || "").match(/[a-zA-Zء-ي]/)) name = c;
+        else if (!cost && Number.isFinite(n) && n !== 0) cost = Math.abs(n);
+      }
+    }
+    name = name.replace(/^["']|["']$/g, "").trim();
+    if (!name || cost <= 0) continue;
+    const key = name.toLowerCase();
+    const prev = seen.get(key);
+    if (prev) {
+      prev.cost = Math.max(prev.cost, cost); // keep the highest monthly charge
+    } else {
+      const tool: SaasTool = {
+        id: crypto.randomUUID(),
+        name,
+        category: findAlternative(name)?.category ?? "",
+        cost,
+        users: 1,
+        usage: 100,
+      };
+      seen.set(key, tool);
+      tools.push(tool);
+    }
+  }
+  return tools;
 }
 
 // --- Shared UI -------------------------------------------------------------
