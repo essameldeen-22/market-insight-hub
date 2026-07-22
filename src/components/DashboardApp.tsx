@@ -467,12 +467,20 @@ function SaasAudit({ currency }: { currency: Currency }) {
   const { t } = useI18n();
   const load = useServerFn(loadSaasStack);
   const save = useServerFn(saveSaasStack);
-  const [tools, setTools] = useState<SaasTool[]>([]);
+  const [tools, setToolsState] = useState<SaasTool[]>([]);
   const [hydrated, setHydrated] = useState(false);
+  // Undo / redo history for the tools table (bug/feature #7).
+  const historyRef = useRef<SaasTool[][]>([]);
+  const futureRef = useRef<SaasTool[][]>([]);
+
+  // Migration cost inputs (feature #6): qualitative sliders that reduce savings.
+  const [teamSize, setTeamSize] = useState(5);
+  const [complexity, setComplexity] = useState(3);
+  const [risk, setRisk] = useState(3);
 
   useEffect(() => {
     load().then((rows) => {
-      setTools(rows.length ? rows : [{ id: crypto.randomUUID(), name: "", category: "", cost: 0, users: 1, usage: 100 }]);
+      setToolsState(rows.length ? rows : [{ id: crypto.randomUUID(), name: "", category: "", cost: 0, users: 1, usage: 100 }]);
       setHydrated(true);
     }).catch(() => setHydrated(true));
   }, [load]);
@@ -482,12 +490,51 @@ function SaasAudit({ currency }: { currency: Currency }) {
     save({ data: { tools } }).catch(() => {});
   }, [tools, hydrated]);
 
+  // History-aware setter — snapshots current tools before mutating.
+  const applyTools = useCallback((next: SaasTool[] | ((prev: SaasTool[]) => SaasTool[])) => {
+    setToolsState((prev) => {
+      historyRef.current.push(prev);
+      if (historyRef.current.length > 50) historyRef.current.shift();
+      futureRef.current = [];
+      return typeof next === "function" ? (next as (p: SaasTool[]) => SaasTool[])(prev) : next;
+    });
+  }, []);
+
+  const undo = useCallback(() => {
+    const prev = historyRef.current.pop();
+    if (!prev) return;
+    setToolsState((cur) => {
+      futureRef.current.push(cur);
+      return prev;
+    });
+  }, []);
+  const redo = useCallback(() => {
+    const next = futureRef.current.pop();
+    if (!next) return;
+    setToolsState((cur) => {
+      historyRef.current.push(cur);
+      return next;
+    });
+  }, []);
+
+  // Keyboard shortcuts for undo/redo, scoped to this panel via window listener.
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const meta = e.ctrlKey || e.metaKey;
+      if (!meta) return;
+      if (e.key.toLowerCase() === "z" && !e.shiftKey) { e.preventDefault(); undo(); }
+      else if ((e.key.toLowerCase() === "z" && e.shiftKey) || e.key.toLowerCase() === "y") { e.preventDefault(); redo(); }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [undo, redo]);
+
   const update = (id: string, patch: Partial<SaasTool>) =>
-    setTools((prev) => prev.map((x) => (x.id === id ? { ...x, ...patch } : x)));
-  const remove = (id: string) => setTools((prev) => prev.filter((x) => x.id !== id));
-  const add = () => setTools((prev) => [...prev, { id: crypto.randomUUID(), name: "", category: "", cost: 0, users: 1, usage: 100 }]);
-  const clear = () => setTools([]);
-  const demo = () => setTools([
+    applyTools((prev) => prev.map((x) => (x.id === id ? { ...x, ...patch } : x)));
+  const remove = (id: string) => applyTools((prev) => prev.filter((x) => x.id !== id));
+  const add = () => applyTools((prev) => [...prev, { id: crypto.randomUUID(), name: "", category: "", cost: 0, users: 1, usage: 100 }]);
+  const clear = () => applyTools([]);
+  const demo = () => applyTools([
     { id: crypto.randomUUID(), name: "Salesforce", category: "CRM", cost: 150, users: 10, usage: 60 },
     { id: crypto.randomUUID(), name: "Slack", category: "Communication", cost: 8, users: 25, usage: 95 },
     { id: crypto.randomUUID(), name: "Figma", category: "Design", cost: 15, users: 5, usage: 80 },
@@ -495,6 +542,20 @@ function SaasAudit({ currency }: { currency: Currency }) {
     { id: crypto.randomUUID(), name: "Notion", category: "Project Management", cost: 10, users: 20, usage: 70 },
     { id: crypto.randomUUID(), name: "Mailchimp", category: "Marketing", cost: 50, users: 3, usage: 30 },
   ]);
+
+  const onCsvFile = async (file: File) => {
+    const text = await file.text();
+    const imported = parseCsvToTools(text);
+    if (imported.length === 0) return;
+    applyTools((prev) => {
+      const existingNames = new Set(prev.map((x) => x.name.toLowerCase()));
+      const merged = [...prev.filter((x) => x.name || x.cost)];
+      for (const tool of imported) {
+        if (!existingNames.has(tool.name.toLowerCase())) merged.push(tool);
+      }
+      return merged;
+    });
+  };
 
   const stats = useMemo(() => {
     let annual = 0;
@@ -518,6 +579,20 @@ function SaasAudit({ currency }: { currency: Currency }) {
     }
     return { annual, savings, waste, topCost, lowUse, migratable };
   }, [tools]);
+
+  // Feature #6: qualitative migration cost model.
+  // Base = per-migratable-tool switching effort × team size × complexity + training × risk.
+  const migrationCost = useMemo(() => {
+    if (stats.migratable === 0) return 0;
+    const perToolHours = 8 * complexity;                    // hours per migratable tool
+    const hourlyRate = 40;                                  // blended $/hr
+    const laborCost = stats.migratable * perToolHours * hourlyRate;
+    const trainingCost = teamSize * 100 * complexity;       // training + docs
+    const riskBuffer = laborCost * (risk / 10);             // extra buffer for risky migrations
+    return Math.round(laborCost + trainingCost + riskBuffer);
+  }, [stats.migratable, teamSize, complexity, risk]);
+
+  const netSavings = Math.max(0, stats.savings - migrationCost);
 
   const catData = useMemo(() => {
     const map = new Map<string, number>();
@@ -549,11 +624,24 @@ function SaasAudit({ currency }: { currency: Currency }) {
     return out;
   }, [stats, tools, currency, t]);
 
+  const canUndo = historyRef.current.length > 0;
+  const canRedo = futureRef.current.length > 0;
+
   return (
     <>
       <div className="panel-header">
         <h2><span className="icon-lead">💼</span> {t("panels.saas.h2")}</h2>
-        <div style={{ display: "flex", gap: "0.5rem" }}>
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          <button className="btn btn-outline btn-sm" onClick={undo} disabled={!canUndo} title="Ctrl+Z">↶ {t("panels.saas.undo")}</button>
+          <button className="btn btn-outline btn-sm" onClick={redo} disabled={!canRedo} title="Ctrl+Y">↷ {t("panels.saas.redo")}</button>
+          <label className="btn btn-outline btn-sm" style={{ cursor: "pointer" }}>
+            📥 {t("panels.saas.csv_import")}
+            <input type="file" accept=".csv,text/csv" style={{ display: "none" }} onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) onCsvFile(f);
+              e.target.value = "";
+            }} />
+          </label>
           <button className="btn btn-outline btn-sm" onClick={demo}>{t("panels.saas.demo")}</button>
           <button className="btn btn-outline btn-sm" onClick={clear}>{t("panels.saas.clear")}</button>
         </div>
@@ -562,6 +650,7 @@ function SaasAudit({ currency }: { currency: Currency }) {
       <div className="dashboard-grid">
         <div className="left-col">
           <Card title={<><span className="icon-lead">🛠️</span> {t("panels.saas.tools_title")}</>}>
+            <div style={{ fontSize: "0.72rem", color: "var(--text3)", marginBottom: "0.5rem" }}>{t("panels.saas.csv_hint")}</div>
             <div className="tool-row-grid header">
               <div>{t("panels.saas.header_name")}</div>
               <div>{t("panels.saas.header_cat")}</div>
@@ -609,6 +698,31 @@ function SaasAudit({ currency }: { currency: Currency }) {
                 <div className="insight-box info" style={{ marginTop: "1rem", fontSize: "0.75rem" }}>{t("panels.saas.savings_note")}</div>
               </>
             )}
+          </Card>
+
+          <Card title={<><span className="icon-lead">🧮</span> {t("panels.saas.migration_cost_title")}</>}>
+            <div className="input-group">
+              <label>{t("panels.saas.migration_team")}: <strong>{teamSize}</strong></label>
+              <input type="range" min={1} max={50} value={teamSize} onChange={(e) => setTeamSize(Number(e.target.value))} />
+            </div>
+            <div className="input-group">
+              <label>{t("panels.saas.migration_complexity")}: <strong>{complexity}</strong></label>
+              <input type="range" min={1} max={5} value={complexity} onChange={(e) => setComplexity(Number(e.target.value))} />
+            </div>
+            <div className="input-group">
+              <label>{t("panels.saas.migration_risk")}: <strong>{risk}</strong></label>
+              <input type="range" min={1} max={5} value={risk} onChange={(e) => setRisk(Number(e.target.value))} />
+            </div>
+            <div className="stats-grid">
+              <div className="stat-card">
+                <div className="stat-label">{t("panels.saas.migration_cost_out")}</div>
+                <div className="stat-value" style={{ color: "var(--danger)", fontSize: "1.05rem" }}>{formatMoney(migrationCost, currency)}</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-label">{t("panels.saas.net_savings")}</div>
+                <div className="stat-value" style={{ color: netSavings > 0 ? "var(--success)" : "var(--text2)", fontSize: "1.05rem" }}>{formatMoney(netSavings, currency)}</div>
+              </div>
+            </div>
           </Card>
         </div>
 
