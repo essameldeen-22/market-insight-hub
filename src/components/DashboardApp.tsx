@@ -1002,6 +1002,22 @@ export function DashboardApp() {
     window.location.href = "/";
   };
 
+  const deleteAcct = useServerFn(deleteMyAccount);
+  const [deleting, setDeleting] = useState(false);
+  const runDelete = async () => {
+    if (!window.confirm(`${t("delete.confirm_title")}\n\n${t("delete.confirm_body")}`)) return;
+    setDeleting(true);
+    try {
+      await deleteAcct();
+      const { supabase } = await import("@/integrations/supabase/client");
+      await supabase.auth.signOut();
+      window.location.href = "/";
+    } catch (e) {
+      setDeleting(false);
+      window.alert(t("delete.error") + (e instanceof Error ? `\n${e.message}` : ""));
+    }
+  };
+
   const cards: { key: ModuleKey; icon: string; klass: string; title: string; desc: string; badge: string; shortcut: string }[] = [
     { key: "competitor", icon: "📊", klass: "purple", title: t("cards.competitor.title"), desc: t("cards.competitor.desc"), badge: t("cards.competitor.badge"), shortcut: "Alt+1" },
     { key: "saas", icon: "💼", klass: "orange", title: t("cards.saas.title"), desc: t("cards.saas.desc"), badge: t("cards.saas.badge"), shortcut: "Alt+2" },
@@ -1029,6 +1045,9 @@ export function DashboardApp() {
 
           <button className="nav-btn" onClick={() => setLang(lang === "ar" ? "en" : "ar")}>{t("nav.language")}</button>
           <button className="nav-btn" onClick={signOut}>{t("nav.signout")}</button>
+          <button className="nav-btn" onClick={runDelete} disabled={deleting} style={{ color: "var(--danger)" }}>
+            {deleting ? t("delete.deleting") : `🗑 ${t("nav.delete_account")}`}
+          </button>
         </div>
       </nav>
 
