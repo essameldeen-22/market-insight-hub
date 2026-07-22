@@ -29,6 +29,7 @@ import {
   type PricingState,
   type RoiState,
 } from "@/lib/persistence.functions";
+import { deleteMyAccount } from "@/lib/account.functions";
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Filler, Title);
 
@@ -41,6 +42,87 @@ function useDebouncedEffect(effect: () => void, deps: unknown[], delay = 600) {
     return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [...deps, delay]);
+}
+
+// --- PDF export (html2canvas + jsPDF, lazy-loaded to keep initial bundle slim) ---
+async function exportElementToPdf(el: HTMLElement, filename: string) {
+  const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+    import("html2canvas"),
+    import("jspdf"),
+  ]);
+  const canvas = await html2canvas(el, { backgroundColor: "#0a0a0f", scale: 2, useCORS: true });
+  const img = canvas.toDataURL("image/png");
+  const pdf = new jsPDF({ orientation: "p", unit: "pt", format: "a4" });
+  const pageW = pdf.internal.pageSize.getWidth();
+  const pageH = pdf.internal.pageSize.getHeight();
+  const ratio = Math.min(pageW / canvas.width, pageH / canvas.height);
+  const w = canvas.width * ratio;
+  const h = canvas.height * ratio;
+  pdf.addImage(img, "PNG", (pageW - w) / 2, 20, w, h);
+  pdf.save(filename);
+}
+
+// --- CSV parser (bank/card statement style: description + amount columns) ---
+function parseCsvToTools(text: string): SaasTool[] {
+  const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  if (lines.length === 0) return [];
+  const splitRow = (line: string): string[] => {
+    // Minimal CSV: handles quoted fields with commas.
+    const out: string[] = [];
+    let cur = "";
+    let inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') { inQ = !inQ; continue; }
+      if (c === "," && !inQ) { out.push(cur); cur = ""; continue; }
+      cur += c;
+    }
+    out.push(cur);
+    return out.map((s) => s.trim());
+  };
+  const header = splitRow(lines[0]).map((h) => h.toLowerCase());
+  const descIdx = header.findIndex((h) => /vendor|description|merchant|payee|name|memo|narrative/.test(h));
+  const amtIdx = header.findIndex((h) => /amount|debit|charge|price|cost|total/.test(h));
+  const hasHeader = descIdx !== -1 && amtIdx !== -1;
+  const startRow = hasHeader ? 1 : 0;
+  const tools: SaasTool[] = [];
+  const seen = new Map<string, SaasTool>();
+  for (let i = startRow; i < lines.length; i++) {
+    const cols = splitRow(lines[i]);
+    let name = "";
+    let cost = 0;
+    if (hasHeader) {
+      name = cols[descIdx] ?? "";
+      cost = Math.abs(Number(String(cols[amtIdx] ?? "").replace(/[^0-9.\-]/g, ""))) || 0;
+    } else {
+      // Heuristic: first non-numeric col = name, first numeric-looking col = amount.
+      for (const c of cols) {
+        const n = Number(String(c).replace(/[^0-9.\-]/g, ""));
+        if (!name && !Number.isFinite(n)) name = c;
+        else if (!name && (c || "").match(/[a-zA-Zء-ي]/)) name = c;
+        else if (!cost && Number.isFinite(n) && n !== 0) cost = Math.abs(n);
+      }
+    }
+    name = name.replace(/^["']|["']$/g, "").trim();
+    if (!name || cost <= 0) continue;
+    const key = name.toLowerCase();
+    const prev = seen.get(key);
+    if (prev) {
+      prev.cost = Math.max(prev.cost, cost); // keep the highest monthly charge
+    } else {
+      const tool: SaasTool = {
+        id: crypto.randomUUID(),
+        name,
+        category: findAlternative(name)?.category ?? "",
+        cost,
+        users: 1,
+        usage: 100,
+      };
+      seen.set(key, tool);
+      tools.push(tool);
+    }
+  }
+  return tools;
 }
 
 // --- Shared UI -------------------------------------------------------------
@@ -61,12 +143,100 @@ function Card({ title, children, right }: { title?: React.ReactNode; children: R
 // --- Competitor Analysis ---------------------------------------------------
 interface Competitor { id: string; name: string; reviews: string; result?: AnalysisResult; loading?: boolean; error?: string; }
 
+// Per-language demo datasets with product-name variants per slot (bug #4).
+const COMPETITOR_DEMOS: Record<"ar" | "en", { name: string; reviews: string[] }[]> = {
+  ar: [
+    {
+      name: "سماعات بلوتوث XYZ",
+      reviews: [
+        "الصوت رائع جداً لكن البطارية ضعيفة بعد 3 شهور استخدام",
+        "مريحة في الاستخدام لفترات طويلة، الجودة ممتازة",
+        "الاتصال بينقطع كتير مع الموبايل، مشكلة كبيرة",
+        "التصميم أنيق والصوت واضح جداً، أنصح بها",
+        "السعر مرتفع مقابل جودة البناء البلاستيكية",
+        "البطارية بتفضل شغالة يوم كامل بشحنة واحدة",
+        "المقاس مناسب والعزل الصوتي ممتاز في الشارع",
+        "خاصية إلغاء الضوضاء ضعيفة مقارنة بالسعر",
+        "التوصيل سريع والتغليف احترافي جداً",
+        "جودة الميكروفون في المكالمات متوسطة",
+      ],
+    },
+    {
+      name: "ساعة ذكية ABC",
+      reviews: [
+        "الشاشة واضحة تحت الشمس بشكل ممتاز",
+        "التطبيق بطيء ومليان bugs، محتاج تحديث",
+        "دقة قياس النبض ممتازة أثناء الجري",
+        "بتفصل عن الموبايل كل شوية",
+        "التصميم أنيق ومناسب للاستخدام اليومي",
+        "البطارية بتكفي 5 أيام فعلاً",
+        "السعر أعلى من المنافسين بدون مبرر",
+        "خاصية GPS دقيقة جداً",
+      ],
+    },
+    {
+      name: "لابتوب DEF Pro",
+      reviews: [
+        "الأداء ممتاز في تشغيل البرامج الثقيلة",
+        "بيسخن جداً بعد ساعة استخدام",
+        "لوحة المفاتيح مريحة والإضاءة رائعة",
+        "المروحة صوتها عالي في الألعاب",
+        "الشاشة ألوانها دقيقة ومناسبة للتصميم",
+        "الوزن ثقيل جداً للحمل اليومي",
+      ],
+    },
+  ],
+  en: [
+    {
+      name: "XYZ Bluetooth Headphones",
+      reviews: [
+        "Battery lasts a full day on a single charge, love it",
+        "Bluetooth keeps disconnecting when I move around",
+        "Design is sleek and the fit is comfortable",
+        "Sound quality is excellent for the price",
+        "Build quality feels cheap for the price tag",
+        "Noise cancellation is weaker than advertised",
+        "Very comfortable for long listening sessions",
+        "Microphone quality on calls is just average",
+        "Fast shipping and premium packaging",
+        "Price is too high for plastic build quality",
+      ],
+    },
+    {
+      name: "ABC Smart Watch",
+      reviews: [
+        "Screen is perfectly readable in sunlight",
+        "Companion app is slow and full of bugs",
+        "Heart-rate tracking is very accurate while running",
+        "Disconnects from my phone constantly",
+        "Sleek design, works well for daily wear",
+        "Battery genuinely lasts 5 days",
+        "Priced higher than competitors without clear reason",
+        "GPS is spot on",
+      ],
+    },
+    {
+      name: "DEF Pro Laptop",
+      reviews: [
+        "Handles heavy workloads without a stutter",
+        "Runs very hot after about an hour of use",
+        "Keyboard is comfortable and backlighting is great",
+        "Fan noise is loud under gaming load",
+        "Colors on the display are accurate, great for design",
+        "Too heavy to carry around every day",
+      ],
+    },
+  ],
+};
+
 function CompetitorAnalysis() {
   const { t, lang } = useI18n();
   const analyze = useServerFn(analyzeReviewsFn);
   const [products, setProducts] = useState<Competitor[]>([
     { id: crypto.randomUUID(), name: "", reviews: "" },
   ]);
+  const reportRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [exporting, setExporting] = useState<string | null>(null);
 
   const runAnalyze = async (id: string) => {
     setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, loading: true, error: undefined } : p)));
@@ -87,36 +257,23 @@ function CompetitorAnalysis() {
     }
   };
 
-  const DEMO_AR = [
-    "الصوت رائع جداً لكن البطارية ضعيفة بعد 3 شهور استخدام",
-    "مريحة في الاستخدام لفترات طويلة، الجودة ممتازة",
-    "الاتصال بينقطع كتير مع الموبايل، مشكلة كبيرة",
-    "التصميم أنيق والصوت واضح جداً، أنصح بها",
-    "السعر مرتفع مقابل جودة البناء البلاستيكية",
-    "البطارية بتفضل شغالة يوم كامل بشحنة واحدة",
-    "المقاس مناسب والعزل الصوتي ممتاز في الشارع",
-    "خاصية إلغاء الضوضاء ضعيفة مقارنة بالسعر",
-    "التوصيل سريع والتغليف احترافي جداً",
-    "جودة الميكروفون في المكالمات متوسطة",
-  ];
-  const DEMO_EN = [
-    "Battery lasts a full day on a single charge, love it",
-    "Bluetooth keeps disconnecting when I move around",
-    "Design is sleek and the fit is comfortable",
-    "Sound quality is excellent for the price",
-    "Build quality feels cheap for the price tag",
-    "Noise cancellation is weaker than advertised",
-    "Very comfortable for long listening sessions",
-    "Microphone quality on calls is just average",
-    "Fast shipping and premium packaging",
-    "Price is too high for plastic build quality",
-  ];
-  const loadDemo = (id: string) => {
-    const demo = (lang === "ar" ? DEMO_AR : DEMO_EN).join("\n");
-    const sampleName = lang === "ar" ? "منتج تجريبي" : "Sample Product";
-    setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, reviews: demo, name: p.name || sampleName } : p)));
+  const loadDemo = (id: string, idx: number) => {
+    const dataset = COMPETITOR_DEMOS[lang];
+    const pick = dataset[idx % dataset.length];
+    setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, name: pick.name, reviews: pick.reviews.join("\n") } : p)));
   };
 
+  const exportPdf = async (id: string, name: string) => {
+    const el = reportRefs.current[id];
+    if (!el) return;
+    try {
+      setExporting(id);
+      const safe = (name || "competitor-analysis").replace(/[^\w\u0621-\u064A -]/g, "_").slice(0, 60);
+      await exportElementToPdf(el, `${safe}.pdf`);
+    } finally {
+      setExporting(null);
+    }
+  };
 
   return (
     <div>
@@ -130,7 +287,7 @@ function CompetitorAnalysis() {
       </div>
 
       {products.map((p, idx) => (
-        <div key={p.id} className="dashboard-grid" style={{ marginBottom: "2rem" }}>
+        <div key={p.id} className="dashboard-grid" style={{ marginBottom: "2rem" }} ref={(el) => { reportRefs.current[p.id] = el; }}>
           <div className="left-col">
             <Card
               title={
@@ -158,9 +315,14 @@ function CompetitorAnalysis() {
                 <button className="btn btn-primary" onClick={() => runAnalyze(p.id)} disabled={p.loading}>
                   {p.loading ? t("panels.competitor.analyzing") : t("panels.competitor.analyze")}
                 </button>
-                <button className="btn btn-outline" onClick={() => loadDemo(p.id)} disabled={p.loading}>
+                <button className="btn btn-outline" onClick={() => loadDemo(p.id, idx)} disabled={p.loading}>
                   {t("panels.competitor.demo")}
                 </button>
+                {p.result && (
+                  <button className="btn btn-outline" onClick={() => exportPdf(p.id, p.name)} disabled={exporting === p.id}>
+                    📄 {exporting === p.id ? "…" : t("panels.competitor.export_pdf")}
+                  </button>
+                )}
               </div>
               {p.error && <div className="insight-box danger" style={{ marginTop: "1rem" }}>{p.error}</div>}
               {p.loading && (
@@ -305,12 +467,20 @@ function SaasAudit({ currency }: { currency: Currency }) {
   const { t } = useI18n();
   const load = useServerFn(loadSaasStack);
   const save = useServerFn(saveSaasStack);
-  const [tools, setTools] = useState<SaasTool[]>([]);
+  const [tools, setToolsState] = useState<SaasTool[]>([]);
   const [hydrated, setHydrated] = useState(false);
+  // Undo / redo history for the tools table (bug/feature #7).
+  const historyRef = useRef<SaasTool[][]>([]);
+  const futureRef = useRef<SaasTool[][]>([]);
+
+  // Migration cost inputs (feature #6): qualitative sliders that reduce savings.
+  const [teamSize, setTeamSize] = useState(5);
+  const [complexity, setComplexity] = useState(3);
+  const [risk, setRisk] = useState(3);
 
   useEffect(() => {
     load().then((rows) => {
-      setTools(rows.length ? rows : [{ id: crypto.randomUUID(), name: "", category: "", cost: 0, users: 1, usage: 100 }]);
+      setToolsState(rows.length ? rows : [{ id: crypto.randomUUID(), name: "", category: "", cost: 0, users: 1, usage: 100 }]);
       setHydrated(true);
     }).catch(() => setHydrated(true));
   }, [load]);
@@ -320,12 +490,51 @@ function SaasAudit({ currency }: { currency: Currency }) {
     save({ data: { tools } }).catch(() => {});
   }, [tools, hydrated]);
 
+  // History-aware setter — snapshots current tools before mutating.
+  const applyTools = useCallback((next: SaasTool[] | ((prev: SaasTool[]) => SaasTool[])) => {
+    setToolsState((prev) => {
+      historyRef.current.push(prev);
+      if (historyRef.current.length > 50) historyRef.current.shift();
+      futureRef.current = [];
+      return typeof next === "function" ? (next as (p: SaasTool[]) => SaasTool[])(prev) : next;
+    });
+  }, []);
+
+  const undo = useCallback(() => {
+    const prev = historyRef.current.pop();
+    if (!prev) return;
+    setToolsState((cur) => {
+      futureRef.current.push(cur);
+      return prev;
+    });
+  }, []);
+  const redo = useCallback(() => {
+    const next = futureRef.current.pop();
+    if (!next) return;
+    setToolsState((cur) => {
+      historyRef.current.push(cur);
+      return next;
+    });
+  }, []);
+
+  // Keyboard shortcuts for undo/redo, scoped to this panel via window listener.
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const meta = e.ctrlKey || e.metaKey;
+      if (!meta) return;
+      if (e.key.toLowerCase() === "z" && !e.shiftKey) { e.preventDefault(); undo(); }
+      else if ((e.key.toLowerCase() === "z" && e.shiftKey) || e.key.toLowerCase() === "y") { e.preventDefault(); redo(); }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [undo, redo]);
+
   const update = (id: string, patch: Partial<SaasTool>) =>
-    setTools((prev) => prev.map((x) => (x.id === id ? { ...x, ...patch } : x)));
-  const remove = (id: string) => setTools((prev) => prev.filter((x) => x.id !== id));
-  const add = () => setTools((prev) => [...prev, { id: crypto.randomUUID(), name: "", category: "", cost: 0, users: 1, usage: 100 }]);
-  const clear = () => setTools([]);
-  const demo = () => setTools([
+    applyTools((prev) => prev.map((x) => (x.id === id ? { ...x, ...patch } : x)));
+  const remove = (id: string) => applyTools((prev) => prev.filter((x) => x.id !== id));
+  const add = () => applyTools((prev) => [...prev, { id: crypto.randomUUID(), name: "", category: "", cost: 0, users: 1, usage: 100 }]);
+  const clear = () => applyTools([]);
+  const demo = () => applyTools([
     { id: crypto.randomUUID(), name: "Salesforce", category: "CRM", cost: 150, users: 10, usage: 60 },
     { id: crypto.randomUUID(), name: "Slack", category: "Communication", cost: 8, users: 25, usage: 95 },
     { id: crypto.randomUUID(), name: "Figma", category: "Design", cost: 15, users: 5, usage: 80 },
@@ -333,6 +542,20 @@ function SaasAudit({ currency }: { currency: Currency }) {
     { id: crypto.randomUUID(), name: "Notion", category: "Project Management", cost: 10, users: 20, usage: 70 },
     { id: crypto.randomUUID(), name: "Mailchimp", category: "Marketing", cost: 50, users: 3, usage: 30 },
   ]);
+
+  const onCsvFile = async (file: File) => {
+    const text = await file.text();
+    const imported = parseCsvToTools(text);
+    if (imported.length === 0) return;
+    applyTools((prev) => {
+      const existingNames = new Set(prev.map((x) => x.name.toLowerCase()));
+      const merged = [...prev.filter((x) => x.name || x.cost)];
+      for (const tool of imported) {
+        if (!existingNames.has(tool.name.toLowerCase())) merged.push(tool);
+      }
+      return merged;
+    });
+  };
 
   const stats = useMemo(() => {
     let annual = 0;
@@ -356,6 +579,20 @@ function SaasAudit({ currency }: { currency: Currency }) {
     }
     return { annual, savings, waste, topCost, lowUse, migratable };
   }, [tools]);
+
+  // Feature #6: qualitative migration cost model.
+  // Base = per-migratable-tool switching effort × team size × complexity + training × risk.
+  const migrationCost = useMemo(() => {
+    if (stats.migratable === 0) return 0;
+    const perToolHours = 8 * complexity;                    // hours per migratable tool
+    const hourlyRate = 40;                                  // blended $/hr
+    const laborCost = stats.migratable * perToolHours * hourlyRate;
+    const trainingCost = teamSize * 100 * complexity;       // training + docs
+    const riskBuffer = laborCost * (risk / 10);             // extra buffer for risky migrations
+    return Math.round(laborCost + trainingCost + riskBuffer);
+  }, [stats.migratable, teamSize, complexity, risk]);
+
+  const netSavings = Math.max(0, stats.savings - migrationCost);
 
   const catData = useMemo(() => {
     const map = new Map<string, number>();
@@ -387,11 +624,24 @@ function SaasAudit({ currency }: { currency: Currency }) {
     return out;
   }, [stats, tools, currency, t]);
 
+  const canUndo = historyRef.current.length > 0;
+  const canRedo = futureRef.current.length > 0;
+
   return (
     <>
       <div className="panel-header">
         <h2><span className="icon-lead">💼</span> {t("panels.saas.h2")}</h2>
-        <div style={{ display: "flex", gap: "0.5rem" }}>
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          <button className="btn btn-outline btn-sm" onClick={undo} disabled={!canUndo} title="Ctrl+Z">↶ {t("panels.saas.undo")}</button>
+          <button className="btn btn-outline btn-sm" onClick={redo} disabled={!canRedo} title="Ctrl+Y">↷ {t("panels.saas.redo")}</button>
+          <label className="btn btn-outline btn-sm" style={{ cursor: "pointer" }}>
+            📥 {t("panels.saas.csv_import")}
+            <input type="file" accept=".csv,text/csv" style={{ display: "none" }} onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) onCsvFile(f);
+              e.target.value = "";
+            }} />
+          </label>
           <button className="btn btn-outline btn-sm" onClick={demo}>{t("panels.saas.demo")}</button>
           <button className="btn btn-outline btn-sm" onClick={clear}>{t("panels.saas.clear")}</button>
         </div>
@@ -400,6 +650,7 @@ function SaasAudit({ currency }: { currency: Currency }) {
       <div className="dashboard-grid">
         <div className="left-col">
           <Card title={<><span className="icon-lead">🛠️</span> {t("panels.saas.tools_title")}</>}>
+            <div style={{ fontSize: "0.72rem", color: "var(--text3)", marginBottom: "0.5rem" }}>{t("panels.saas.csv_hint")}</div>
             <div className="tool-row-grid header">
               <div>{t("panels.saas.header_name")}</div>
               <div>{t("panels.saas.header_cat")}</div>
@@ -447,6 +698,31 @@ function SaasAudit({ currency }: { currency: Currency }) {
                 <div className="insight-box info" style={{ marginTop: "1rem", fontSize: "0.75rem" }}>{t("panels.saas.savings_note")}</div>
               </>
             )}
+          </Card>
+
+          <Card title={<><span className="icon-lead">🧮</span> {t("panels.saas.migration_cost_title")}</>}>
+            <div className="input-group">
+              <label>{t("panels.saas.migration_team")}: <strong>{teamSize}</strong></label>
+              <input type="range" min={1} max={50} value={teamSize} onChange={(e) => setTeamSize(Number(e.target.value))} />
+            </div>
+            <div className="input-group">
+              <label>{t("panels.saas.migration_complexity")}: <strong>{complexity}</strong></label>
+              <input type="range" min={1} max={5} value={complexity} onChange={(e) => setComplexity(Number(e.target.value))} />
+            </div>
+            <div className="input-group">
+              <label>{t("panels.saas.migration_risk")}: <strong>{risk}</strong></label>
+              <input type="range" min={1} max={5} value={risk} onChange={(e) => setRisk(Number(e.target.value))} />
+            </div>
+            <div className="stats-grid">
+              <div className="stat-card">
+                <div className="stat-label">{t("panels.saas.migration_cost_out")}</div>
+                <div className="stat-value" style={{ color: "var(--danger)", fontSize: "1.05rem" }}>{formatMoney(migrationCost, currency)}</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-label">{t("panels.saas.net_savings")}</div>
+                <div className="stat-value" style={{ color: netSavings > 0 ? "var(--success)" : "var(--text2)", fontSize: "1.05rem" }}>{formatMoney(netSavings, currency)}</div>
+              </div>
+            </div>
           </Card>
         </div>
 
@@ -726,6 +1002,22 @@ export function DashboardApp() {
     window.location.href = "/";
   };
 
+  const deleteAcct = useServerFn(deleteMyAccount);
+  const [deleting, setDeleting] = useState(false);
+  const runDelete = async () => {
+    if (!window.confirm(`${t("delete.confirm_title")}\n\n${t("delete.confirm_body")}`)) return;
+    setDeleting(true);
+    try {
+      await deleteAcct();
+      const { supabase } = await import("@/integrations/supabase/client");
+      await supabase.auth.signOut();
+      window.location.href = "/";
+    } catch (e) {
+      setDeleting(false);
+      window.alert(t("delete.error") + (e instanceof Error ? `\n${e.message}` : ""));
+    }
+  };
+
   const cards: { key: ModuleKey; icon: string; klass: string; title: string; desc: string; badge: string; shortcut: string }[] = [
     { key: "competitor", icon: "📊", klass: "purple", title: t("cards.competitor.title"), desc: t("cards.competitor.desc"), badge: t("cards.competitor.badge"), shortcut: "Alt+1" },
     { key: "saas", icon: "💼", klass: "orange", title: t("cards.saas.title"), desc: t("cards.saas.desc"), badge: t("cards.saas.badge"), shortcut: "Alt+2" },
@@ -753,6 +1045,9 @@ export function DashboardApp() {
 
           <button className="nav-btn" onClick={() => setLang(lang === "ar" ? "en" : "ar")}>{t("nav.language")}</button>
           <button className="nav-btn" onClick={signOut}>{t("nav.signout")}</button>
+          <button className="nav-btn" onClick={runDelete} disabled={deleting} style={{ color: "var(--danger)" }}>
+            {deleting ? t("delete.deleting") : `🗑 ${t("nav.delete_account")}`}
+          </button>
         </div>
       </nav>
 
