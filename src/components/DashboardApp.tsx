@@ -1015,7 +1015,8 @@ function RoiCalculator({ currency }: { currency: Currency }) {
           )}
         </div>
       </div>
-    </>
+    </div>
+
   );
 }
 
