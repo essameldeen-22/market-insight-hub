@@ -906,7 +906,8 @@ function PricingCalculator({ currency }: { currency: Currency }) {
           </Card>
         </div>
       </div>
-    </>
+    </div>
+
   );
 }
 
