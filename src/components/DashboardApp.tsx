@@ -652,8 +652,17 @@ function SaasAudit({ currency }: { currency: Currency }) {
   const canUndo = history.length > 0;
   const canRedo = future.length > 0;
 
+  const reportRef = useRef<HTMLDivElement | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const doExport = async () => {
+    if (!reportRef.current) return;
+    setExporting(true);
+    try { await exportElementToPdf(reportRef.current, "saas-audit.pdf"); }
+    finally { setExporting(false); }
+  };
+
   return (
-    <>
+    <div ref={reportRef}>
       <div className="panel-header">
         <h2><span className="icon-lead">💼</span> {t("panels.saas.h2")}</h2>
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
@@ -669,6 +678,7 @@ function SaasAudit({ currency }: { currency: Currency }) {
           </label>
           <button className="btn btn-outline btn-sm" onClick={demo}>{t("panels.saas.demo")}</button>
           <button className="btn btn-outline btn-sm" onClick={clear}>{t("panels.saas.clear")}</button>
+          <button className="btn btn-outline btn-sm" onClick={doExport} disabled={exporting || tools.length === 0}>📄 {exporting ? "…" : t("actions.export_pdf")}</button>
         </div>
       </div>
 
