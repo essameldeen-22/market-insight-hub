@@ -23,12 +23,17 @@ function detectInitial(): Lang {
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  // SSR renders "ar"; on hydration/mount we read the persisted value.
-  const [lang, setLangState] = useState<Lang>("ar");
-  const hydrated = useRef(false);
+  // Read persisted language synchronously on the client. This eliminates the
+  // flash where routes briefly rendered the SSR default ("ar") before an
+  // effect swapped in the saved value. On the server we render "ar"; on the
+  // client the very first paint uses the persisted value.
+  const [lang, setLangState] = useState<Lang>(() =>
+    typeof window === "undefined" ? "ar" : detectInitial(),
+  );
+  const hydrated = useRef(typeof window !== "undefined");
 
-  // Re-read persisted language on EVERY mount (fixes lang reverting on route change).
   useEffect(() => {
+    // After hydration, re-sync in case another tab changed storage.
     const detected = detectInitial();
     if (detected !== lang) setLangState(detected);
     hydrated.current = true;
@@ -40,7 +45,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     const html = document.documentElement;
     html.setAttribute("lang", lang);
     html.setAttribute("dir", lang === "ar" ? "rtl" : "ltr");
-    // Only persist AFTER hydration so the SSR default doesn't clobber saved value on mount.
     if (hydrated.current) {
       try { localStorage.setItem("mis_lang", lang); } catch { /* ignore */ }
     }
