@@ -830,11 +830,23 @@ function PricingCalculator({ currency }: { currency: Currency }) {
   if (state.margin < 20) insights.push({ kind: "warn", text: t("panels.pricing.ins_lowmargin") });
   if (breakEven > state.customers) insights.push({ kind: "danger", text: t("panels.pricing.ins_high_be") });
 
+  const reportRef = useRef<HTMLDivElement | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const doExport = async () => {
+    if (!reportRef.current) return;
+    setExporting(true);
+    try { await exportElementToPdf(reportRef.current, "pricing-calculator.pdf"); }
+    finally { setExporting(false); }
+  };
+
   return (
-    <>
+    <div ref={reportRef}>
       <div className="panel-header">
         <h2><span className="icon-lead">💰</span> {t("panels.pricing.h2")}</h2>
-        <button className="btn btn-outline btn-sm" onClick={() => setState({ cost: 0, customers: 0, competitor: 0, margin: 30, model: "subscription" })}>{t("panels.pricing.reset")}</button>
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          <button className="btn btn-outline btn-sm" onClick={() => setState({ cost: 0, customers: 0, competitor: 0, margin: 30, model: "subscription" })}>{t("panels.pricing.reset")}</button>
+          <button className="btn btn-outline btn-sm" onClick={doExport} disabled={exporting}>📄 {exporting ? "…" : t("actions.export_pdf")}</button>
+        </div>
       </div>
       <div className="dashboard-grid">
         <div className="left-col">
