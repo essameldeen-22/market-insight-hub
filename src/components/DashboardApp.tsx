@@ -956,11 +956,23 @@ function RoiCalculator({ currency }: { currency: Currency }) {
   if (monthlyNet !== 0) insights.push({ kind: "info", text: t("panels.roi.net_monthly", { money: formatMoney(monthlyNet, currency) }) });
   if (net !== 0) insights.push({ kind: net > 0 ? "success" : "danger", text: t("panels.roi.net_period", { p: state.period, money: formatMoney(net, currency) }) });
 
+  const reportRef = useRef<HTMLDivElement | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const doExport = async () => {
+    if (!reportRef.current) return;
+    setExporting(true);
+    try { await exportElementToPdf(reportRef.current, "roi-calculator.pdf"); }
+    finally { setExporting(false); }
+  };
+
   return (
-    <>
+    <div ref={reportRef}>
       <div className="panel-header">
         <h2><span className="icon-lead">📊</span> {t("panels.roi.h2")}</h2>
-        <button className="btn btn-outline btn-sm" onClick={() => setState({ initial: 0, monthly: 0, savings: 0, revenue: 0, period: 12 })}>{t("panels.roi.reset")}</button>
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          <button className="btn btn-outline btn-sm" onClick={() => setState({ initial: 0, monthly: 0, savings: 0, revenue: 0, period: 12 })}>{t("panels.roi.reset")}</button>
+          <button className="btn btn-outline btn-sm" onClick={doExport} disabled={exporting}>📄 {exporting ? "…" : t("actions.export_pdf")}</button>
+        </div>
       </div>
       <div className="dashboard-grid">
         <div className="left-col">
