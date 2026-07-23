@@ -469,9 +469,10 @@ function SaasAudit({ currency }: { currency: Currency }) {
   const save = useServerFn(saveSaasStack);
   const [tools, setToolsState] = useState<SaasTool[]>([]);
   const [hydrated, setHydrated] = useState(false);
-  // Undo / redo history for the tools table (bug/feature #7).
-  const historyRef = useRef<SaasTool[][]>([]);
-  const futureRef = useRef<SaasTool[][]>([]);
+  // Undo / redo history — stored in state so buttons re-render on change.
+  // Each entry is a snapshot of the tools array at a distinct data state.
+  const [history, setHistory] = useState<SaasTool[][]>([]);
+  const [future, setFuture] = useState<SaasTool[][]>([]);
 
   // Migration cost inputs (feature #6): qualitative sliders that reduce savings.
   const [teamSize, setTeamSize] = useState(5);
@@ -490,30 +491,53 @@ function SaasAudit({ currency }: { currency: Currency }) {
     save({ data: { tools } }).catch(() => {});
   }, [tools, hydrated]);
 
-  // History-aware setter — snapshots current tools before mutating.
+  // Deep equality: only push a snapshot when the tool data actually changed.
+  const sameTools = (a: SaasTool[], b: SaasTool[]) => {
+    if (a === b) return true;
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+      const x = a[i], y = b[i];
+      if (x.id !== y.id || x.name !== y.name || x.category !== y.category ||
+          x.cost !== y.cost || x.users !== y.users || x.usage !== y.usage) return false;
+    }
+    return true;
+  };
+
+  // History-aware setter — snapshots current tools before mutating,
+  // but only when the resulting state is genuinely different.
   const applyTools = useCallback((next: SaasTool[] | ((prev: SaasTool[]) => SaasTool[])) => {
     setToolsState((prev) => {
-      historyRef.current.push(prev);
-      if (historyRef.current.length > 50) historyRef.current.shift();
-      futureRef.current = [];
-      return typeof next === "function" ? (next as (p: SaasTool[]) => SaasTool[])(prev) : next;
+      const resolved = typeof next === "function" ? (next as (p: SaasTool[]) => SaasTool[])(prev) : next;
+      if (sameTools(prev, resolved)) return prev; // no-op → no history entry
+      setHistory((h) => {
+        const capped = h.length >= 50 ? h.slice(1) : h;
+        return [...capped, prev];
+      });
+      setFuture([]);
+      return resolved;
     });
   }, []);
 
   const undo = useCallback(() => {
-    const prev = historyRef.current.pop();
-    if (!prev) return;
-    setToolsState((cur) => {
-      futureRef.current.push(cur);
-      return prev;
+    setHistory((h) => {
+      if (h.length === 0) return h;
+      const prev = h[h.length - 1];
+      setToolsState((cur) => {
+        setFuture((f) => [...f, cur]);
+        return prev;
+      });
+      return h.slice(0, -1);
     });
   }, []);
   const redo = useCallback(() => {
-    const next = futureRef.current.pop();
-    if (!next) return;
-    setToolsState((cur) => {
-      historyRef.current.push(cur);
-      return next;
+    setFuture((f) => {
+      if (f.length === 0) return f;
+      const next = f[f.length - 1];
+      setToolsState((cur) => {
+        setHistory((h) => [...h, cur]);
+        return next;
+      });
+      return f.slice(0, -1);
     });
   }, []);
 
@@ -542,6 +566,7 @@ function SaasAudit({ currency }: { currency: Currency }) {
     { id: crypto.randomUUID(), name: "Notion", category: "Project Management", cost: 10, users: 20, usage: 70 },
     { id: crypto.randomUUID(), name: "Mailchimp", category: "Marketing", cost: 50, users: 3, usage: 30 },
   ]);
+
 
   const onCsvFile = async (file: File) => {
     const text = await file.text();
