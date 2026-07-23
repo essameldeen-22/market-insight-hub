@@ -790,7 +790,8 @@ function SaasAudit({ currency }: { currency: Currency }) {
           )}
         </div>
       </div>
-    </>
+    </div>
+
   );
 }
 
