@@ -109,6 +109,7 @@ export const TRANSLATIONS: Record<Lang, Dict> = {
     "panels.saas.migration_cost_out": "تكلفة الانتقال المقدرة",
     "panels.saas.net_savings": "صافي التوفير في السنة الأولى",
     "panels.competitor.export_pdf": "تصدير PDF",
+    "actions.export_pdf": "تصدير PDF",
     "nav.delete_account": "حذف الحساب",
     "delete.confirm_title": "حذف الحساب نهائياً",
     "delete.confirm_body": "سيتم حذف حسابك وجميع بياناتك (التحليلات، قوائم SaaS، حالة التسعير و ROI). لا يمكن التراجع.",
