@@ -649,8 +649,8 @@ function SaasAudit({ currency }: { currency: Currency }) {
     return out;
   }, [stats, tools, currency, t]);
 
-  const canUndo = historyRef.current.length > 0;
-  const canRedo = futureRef.current.length > 0;
+  const canUndo = history.length > 0;
+  const canRedo = future.length > 0;
 
   return (
     <>
