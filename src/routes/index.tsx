@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { LanguageProvider, useI18n } from "@/i18n/context";
+import { useI18n } from "@/i18n/context";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
@@ -13,11 +13,7 @@ export const Route = createFileRoute("/")({
       { property: "og:type", content: "website" },
     ],
   }),
-  component: () => (
-    <LanguageProvider>
-      <Landing />
-    </LanguageProvider>
-  ),
+  component: Landing,
 });
 
 function Landing() {
