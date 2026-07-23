@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { LanguageProvider, useI18n } from "@/i18n/context";
+import { useI18n } from "@/i18n/context";
 
 export const Route = createFileRoute("/value")({
   head: () => ({
@@ -13,11 +13,7 @@ export const Route = createFileRoute("/value")({
     ],
     links: [{ rel: "canonical", href: "/value" }],
   }),
-  component: () => (
-    <LanguageProvider>
-      <ValuePage />
-    </LanguageProvider>
-  ),
+  component: ValuePage,
 });
 
 function ValuePage() {
@@ -29,6 +25,7 @@ function ValuePage() {
         <div className="logo"><div className="logo-icon">MI</div><span>Market Intelligence</span></div>
         <div className="nav-actions">
           <Link to="/" className="nav-btn">Home</Link>
+          <Link to="/app" className="nav-btn">{t("nav.app")}</Link>
           <Link to="/pricing" className="nav-btn">{t("nav.marketing.pricing")}</Link>
           <Link to="/about" className="nav-btn">{t("nav.marketing.about")}</Link>
           <button className="nav-btn" onClick={() => setLang(lang === "ar" ? "en" : "ar")}>{t("nav.language")}</button>

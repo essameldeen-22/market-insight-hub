@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { LanguageProvider, useI18n } from "@/i18n/context";
+import { useI18n } from "@/i18n/context";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/about")({
@@ -15,11 +15,7 @@ export const Route = createFileRoute("/about")({
     ],
     links: [{ rel: "canonical", href: "/about" }],
   }),
-  component: () => (
-    <LanguageProvider>
-      <AboutPage />
-    </LanguageProvider>
-  ),
+  component: AboutPage,
 });
 
 function AboutPage() {
@@ -44,6 +40,7 @@ function AboutPage() {
         <div className="logo"><div className="logo-icon">MI</div><span>Market Intelligence</span></div>
         <div className="nav-actions">
           <Link to="/" className="nav-btn">Home</Link>
+          <Link to="/app" className="nav-btn">{t("nav.app")}</Link>
           <Link to="/value" className="nav-btn">{t("nav.marketing.value")}</Link>
           <Link to="/pricing" className="nav-btn">{t("nav.marketing.pricing")}</Link>
           <button className="nav-btn" onClick={() => setLang(lang === "ar" ? "en" : "ar")}>{t("nav.language")}</button>

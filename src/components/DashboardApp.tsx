@@ -469,9 +469,10 @@ function SaasAudit({ currency }: { currency: Currency }) {
   const save = useServerFn(saveSaasStack);
   const [tools, setToolsState] = useState<SaasTool[]>([]);
   const [hydrated, setHydrated] = useState(false);
-  // Undo / redo history for the tools table (bug/feature #7).
-  const historyRef = useRef<SaasTool[][]>([]);
-  const futureRef = useRef<SaasTool[][]>([]);
+  // Undo / redo history — stored in state so buttons re-render on change.
+  // Each entry is a snapshot of the tools array at a distinct data state.
+  const [history, setHistory] = useState<SaasTool[][]>([]);
+  const [future, setFuture] = useState<SaasTool[][]>([]);
 
   // Migration cost inputs (feature #6): qualitative sliders that reduce savings.
   const [teamSize, setTeamSize] = useState(5);
@@ -490,30 +491,53 @@ function SaasAudit({ currency }: { currency: Currency }) {
     save({ data: { tools } }).catch(() => {});
   }, [tools, hydrated]);
 
-  // History-aware setter — snapshots current tools before mutating.
+  // Deep equality: only push a snapshot when the tool data actually changed.
+  const sameTools = (a: SaasTool[], b: SaasTool[]) => {
+    if (a === b) return true;
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+      const x = a[i], y = b[i];
+      if (x.id !== y.id || x.name !== y.name || x.category !== y.category ||
+          x.cost !== y.cost || x.users !== y.users || x.usage !== y.usage) return false;
+    }
+    return true;
+  };
+
+  // History-aware setter — snapshots current tools before mutating,
+  // but only when the resulting state is genuinely different.
   const applyTools = useCallback((next: SaasTool[] | ((prev: SaasTool[]) => SaasTool[])) => {
     setToolsState((prev) => {
-      historyRef.current.push(prev);
-      if (historyRef.current.length > 50) historyRef.current.shift();
-      futureRef.current = [];
-      return typeof next === "function" ? (next as (p: SaasTool[]) => SaasTool[])(prev) : next;
+      const resolved = typeof next === "function" ? (next as (p: SaasTool[]) => SaasTool[])(prev) : next;
+      if (sameTools(prev, resolved)) return prev; // no-op → no history entry
+      setHistory((h) => {
+        const capped = h.length >= 50 ? h.slice(1) : h;
+        return [...capped, prev];
+      });
+      setFuture([]);
+      return resolved;
     });
   }, []);
 
   const undo = useCallback(() => {
-    const prev = historyRef.current.pop();
-    if (!prev) return;
-    setToolsState((cur) => {
-      futureRef.current.push(cur);
-      return prev;
+    setHistory((h) => {
+      if (h.length === 0) return h;
+      const prev = h[h.length - 1];
+      setToolsState((cur) => {
+        setFuture((f) => [...f, cur]);
+        return prev;
+      });
+      return h.slice(0, -1);
     });
   }, []);
   const redo = useCallback(() => {
-    const next = futureRef.current.pop();
-    if (!next) return;
-    setToolsState((cur) => {
-      historyRef.current.push(cur);
-      return next;
+    setFuture((f) => {
+      if (f.length === 0) return f;
+      const next = f[f.length - 1];
+      setToolsState((cur) => {
+        setHistory((h) => [...h, cur]);
+        return next;
+      });
+      return f.slice(0, -1);
     });
   }, []);
 
@@ -542,6 +566,7 @@ function SaasAudit({ currency }: { currency: Currency }) {
     { id: crypto.randomUUID(), name: "Notion", category: "Project Management", cost: 10, users: 20, usage: 70 },
     { id: crypto.randomUUID(), name: "Mailchimp", category: "Marketing", cost: 50, users: 3, usage: 30 },
   ]);
+
 
   const onCsvFile = async (file: File) => {
     const text = await file.text();
@@ -624,11 +649,20 @@ function SaasAudit({ currency }: { currency: Currency }) {
     return out;
   }, [stats, tools, currency, t]);
 
-  const canUndo = historyRef.current.length > 0;
-  const canRedo = futureRef.current.length > 0;
+  const canUndo = history.length > 0;
+  const canRedo = future.length > 0;
+
+  const reportRef = useRef<HTMLDivElement | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const doExport = async () => {
+    if (!reportRef.current) return;
+    setExporting(true);
+    try { await exportElementToPdf(reportRef.current, "saas-audit.pdf"); }
+    finally { setExporting(false); }
+  };
 
   return (
-    <>
+    <div ref={reportRef}>
       <div className="panel-header">
         <h2><span className="icon-lead">💼</span> {t("panels.saas.h2")}</h2>
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
@@ -644,6 +678,7 @@ function SaasAudit({ currency }: { currency: Currency }) {
           </label>
           <button className="btn btn-outline btn-sm" onClick={demo}>{t("panels.saas.demo")}</button>
           <button className="btn btn-outline btn-sm" onClick={clear}>{t("panels.saas.clear")}</button>
+          <button className="btn btn-outline btn-sm" onClick={doExport} disabled={exporting || tools.length === 0}>📄 {exporting ? "…" : t("actions.export_pdf")}</button>
         </div>
       </div>
 
@@ -755,7 +790,8 @@ function SaasAudit({ currency }: { currency: Currency }) {
           )}
         </div>
       </div>
-    </>
+    </div>
+
   );
 }
 
@@ -794,11 +830,23 @@ function PricingCalculator({ currency }: { currency: Currency }) {
   if (state.margin < 20) insights.push({ kind: "warn", text: t("panels.pricing.ins_lowmargin") });
   if (breakEven > state.customers) insights.push({ kind: "danger", text: t("panels.pricing.ins_high_be") });
 
+  const reportRef = useRef<HTMLDivElement | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const doExport = async () => {
+    if (!reportRef.current) return;
+    setExporting(true);
+    try { await exportElementToPdf(reportRef.current, "pricing-calculator.pdf"); }
+    finally { setExporting(false); }
+  };
+
   return (
-    <>
+    <div ref={reportRef}>
       <div className="panel-header">
         <h2><span className="icon-lead">💰</span> {t("panels.pricing.h2")}</h2>
-        <button className="btn btn-outline btn-sm" onClick={() => setState({ cost: 0, customers: 0, competitor: 0, margin: 30, model: "subscription" })}>{t("panels.pricing.reset")}</button>
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          <button className="btn btn-outline btn-sm" onClick={() => setState({ cost: 0, customers: 0, competitor: 0, margin: 30, model: "subscription" })}>{t("panels.pricing.reset")}</button>
+          <button className="btn btn-outline btn-sm" onClick={doExport} disabled={exporting}>📄 {exporting ? "…" : t("actions.export_pdf")}</button>
+        </div>
       </div>
       <div className="dashboard-grid">
         <div className="left-col">
@@ -858,7 +906,8 @@ function PricingCalculator({ currency }: { currency: Currency }) {
           </Card>
         </div>
       </div>
-    </>
+    </div>
+
   );
 }
 
@@ -907,11 +956,23 @@ function RoiCalculator({ currency }: { currency: Currency }) {
   if (monthlyNet !== 0) insights.push({ kind: "info", text: t("panels.roi.net_monthly", { money: formatMoney(monthlyNet, currency) }) });
   if (net !== 0) insights.push({ kind: net > 0 ? "success" : "danger", text: t("panels.roi.net_period", { p: state.period, money: formatMoney(net, currency) }) });
 
+  const reportRef = useRef<HTMLDivElement | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const doExport = async () => {
+    if (!reportRef.current) return;
+    setExporting(true);
+    try { await exportElementToPdf(reportRef.current, "roi-calculator.pdf"); }
+    finally { setExporting(false); }
+  };
+
   return (
-    <>
+    <div ref={reportRef}>
       <div className="panel-header">
         <h2><span className="icon-lead">📊</span> {t("panels.roi.h2")}</h2>
-        <button className="btn btn-outline btn-sm" onClick={() => setState({ initial: 0, monthly: 0, savings: 0, revenue: 0, period: 12 })}>{t("panels.roi.reset")}</button>
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          <button className="btn btn-outline btn-sm" onClick={() => setState({ initial: 0, monthly: 0, savings: 0, revenue: 0, period: 12 })}>{t("panels.roi.reset")}</button>
+          <button className="btn btn-outline btn-sm" onClick={doExport} disabled={exporting}>📄 {exporting ? "…" : t("actions.export_pdf")}</button>
+        </div>
       </div>
       <div className="dashboard-grid">
         <div className="left-col">
@@ -954,7 +1015,8 @@ function RoiCalculator({ currency }: { currency: Currency }) {
           )}
         </div>
       </div>
-    </>
+    </div>
+
   );
 }
 
