@@ -450,6 +450,7 @@ export const TRANSLATIONS: Record<Lang, Dict> = {
     "panels.saas.migration_cost_out": "Estimated migration cost",
     "panels.saas.net_savings": "Net year-1 savings",
     "panels.competitor.export_pdf": "Export PDF",
+    "actions.export_pdf": "Export PDF",
     "nav.delete_account": "Delete account",
     "delete.confirm_title": "Permanently delete account",
     "delete.confirm_body": "This will delete your account and ALL data (analyses, SaaS lists, pricing & ROI state). This cannot be undone.",
