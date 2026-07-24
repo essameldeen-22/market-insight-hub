@@ -231,7 +231,12 @@ export const TRANSLATIONS: Record<Lang, Dict> = {
     "about.contact.send": "إرسال",
     "about.contact.sent": "تم استلام رسالتك، شكراً!",
     "about.contact.error": "تعذر الإرسال. حاول مرة أخرى.",
-
+    "nav.home": "الرئيسية",
+    "footer.terms": "الشروط",
+    "footer.privacy": "الخصوصية",
+    "rates.updated": "أسعار الصرف: {ts}",
+    "rates.loading": "جاري تحميل أسعار الصرف…",
+    "rates.fallback": "أسعار افتراضية (تعذر جلب الأسعار الحية)",
   },
   en: {
     "nav.theme": "Theme",
@@ -457,6 +462,12 @@ export const TRANSLATIONS: Record<Lang, Dict> = {
     "delete.confirm_yes": "Yes, delete everything",
     "delete.deleting": "Deleting...",
     "delete.error": "Could not delete. Please try again.",
+    "nav.home": "Home",
+    "footer.terms": "Terms",
+    "footer.privacy": "Privacy",
+    "rates.updated": "Rates: {ts}",
+    "rates.loading": "Loading live rates…",
+    "rates.fallback": "Fallback rates (live fetch failed)",
   },
 };
 

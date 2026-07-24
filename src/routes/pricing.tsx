@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useI18n } from "@/i18n/context";
+import { SiteNav, SiteFooter } from "@/components/SiteNav";
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
@@ -17,7 +18,7 @@ export const Route = createFileRoute("/pricing")({
 });
 
 function PricingPage() {
-  const { t, lang, setLang } = useI18n();
+  const { t } = useI18n();
   const plans = [
     {
       key: "free", klass: "purple",
@@ -39,17 +40,7 @@ function PricingPage() {
   return (
     <>
       <div className="bg-mesh" />
-      <nav className="nav">
-        <div className="logo"><div className="logo-icon">MI</div><span>Market Intelligence</span></div>
-        <div className="nav-actions">
-          <Link to="/" className="nav-btn">Home</Link>
-          <Link to="/app" className="nav-btn">{t("nav.app")}</Link>
-          <Link to="/value" className="nav-btn">{t("nav.marketing.value")}</Link>
-          <Link to="/about" className="nav-btn">{t("nav.marketing.about")}</Link>
-          <button className="nav-btn" onClick={() => setLang(lang === "ar" ? "en" : "ar")}>{t("nav.language")}</button>
-          <Link to="/auth" className="nav-btn primary">{t("nav.start")}</Link>
-        </div>
-      </nav>
+      <SiteNav />
       <section className="hero">
         <h1><span>{t("pricing.title")}</span></h1>
         <p>{t("pricing.subtitle")}</p>
@@ -70,7 +61,7 @@ function PricingPage() {
           </div>
         ))}
       </div>
-      <div className="footer">{t("footer.tagline")}</div>
+      <SiteFooter />
     </>
   );
 }

@@ -1,7 +1,8 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useI18n } from "@/i18n/context";
 import { supabase } from "@/integrations/supabase/client";
+import { SiteNav, SiteFooter } from "@/components/SiteNav";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -17,7 +18,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
-  const { t, lang, setLang } = useI18n();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const [signedIn, setSignedIn] = useState(false);
 
@@ -42,27 +43,7 @@ function Landing() {
   return (
     <>
       <div className="bg-mesh" />
-      <nav className="nav">
-        <div className="logo">
-          <div className="logo-icon">MI</div>
-          <span>Market Intelligence</span>
-        </div>
-        <div className="nav-actions">
-          <Link to="/value" className="nav-btn">{t("nav.marketing.value")}</Link>
-          <Link to="/pricing" className="nav-btn">{t("nav.marketing.pricing")}</Link>
-          <Link to="/about" className="nav-btn">{t("nav.marketing.about")}</Link>
-          <button className="nav-btn" onClick={() => setLang(lang === "ar" ? "en" : "ar")}>{t("nav.language")}</button>
-          {signedIn ? (
-            <Link to="/app" className="nav-btn primary">{t("nav.app")}</Link>
-          ) : (
-            <>
-              <Link to="/auth" className="nav-btn">{t("nav.signin")}</Link>
-              <button className="nav-btn primary" onClick={cta}>{t("nav.start")}</button>
-            </>
-          )}
-        </div>
-
-      </nav>
+      <SiteNav />
 
       <section className="hero">
         <div className="badge"><span className="badge-dot" />{t("hero.badge")}</div>
@@ -82,7 +63,7 @@ function Landing() {
         ))}
       </div>
 
-      <div className="footer">{t("footer.tagline")}</div>
+      <SiteFooter />
     </>
   );
 }
