@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ValueRouteImport } from './routes/value'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
@@ -20,6 +22,16 @@ import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/ap
 const ValueRoute = ValueRouteImport.update({
   id: '/value',
   path: '/value',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricingRoute = PricingRouteImport.update({
@@ -57,6 +69,8 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
   '/value': typeof ValueRoute
   '/app': typeof AuthenticatedAppRoute
 }
@@ -65,6 +79,8 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
   '/value': typeof ValueRoute
   '/app': typeof AuthenticatedAppRoute
 }
@@ -75,14 +91,32 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
   '/value': typeof ValueRoute
   '/_authenticated/app': typeof AuthenticatedAppRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/auth' | '/pricing' | '/value' | '/app'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/auth'
+    | '/pricing'
+    | '/privacy'
+    | '/terms'
+    | '/value'
+    | '/app'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/auth' | '/pricing' | '/value' | '/app'
+  to:
+    | '/'
+    | '/about'
+    | '/auth'
+    | '/pricing'
+    | '/privacy'
+    | '/terms'
+    | '/value'
+    | '/app'
   id:
     | '__root__'
     | '/'
@@ -90,6 +124,8 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/pricing'
+    | '/privacy'
+    | '/terms'
     | '/value'
     | '/_authenticated/app'
   fileRoutesById: FileRoutesById
@@ -100,6 +136,8 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRoute
   PricingRoute: typeof PricingRoute
+  PrivacyRoute: typeof PrivacyRoute
+  TermsRoute: typeof TermsRoute
   ValueRoute: typeof ValueRoute
 }
 
@@ -110,6 +148,20 @@ declare module '@tanstack/react-router' {
       path: '/value'
       fullPath: '/value'
       preLoaderRoute: typeof ValueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pricing': {
@@ -174,18 +226,10 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AuthRoute: AuthRoute,
   PricingRoute: PricingRoute,
+  PrivacyRoute: PrivacyRoute,
+  TermsRoute: TermsRoute,
   ValueRoute: ValueRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
