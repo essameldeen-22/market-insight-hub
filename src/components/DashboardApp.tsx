@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
   Chart as ChartJS,
@@ -15,6 +16,7 @@ import {
 import { Doughnut, Line } from "react-chartjs-2";
 import { useI18n } from "@/i18n/context";
 import { CURRENCIES, formatMoney, type Currency } from "@/lib/currency";
+import { useRates } from "@/lib/rates";
 import { findAlternative, SAAS_CATEGORIES } from "@/lib/saas-alts";
 import { analyzeReviewsFn } from "@/lib/claude.functions";
 import type { AnalysisResult } from "@/lib/claude.server";
@@ -491,13 +493,16 @@ function SaasAudit({ currency }: { currency: Currency }) {
     save({ data: { tools } }).catch(() => {});
   }, [tools, hydrated]);
 
-  // Deep equality: only push a snapshot when the tool data actually changed.
+  // Deep equality on tool DATA (ignoring the row `id`, which is regenerated
+  // by Load Demo / CSV import). This ensures repeated clicks on Load Demo
+  // (or any action that yields identical data) do NOT push a duplicate entry
+  // onto the undo stack.
   const sameTools = (a: SaasTool[], b: SaasTool[]) => {
     if (a === b) return true;
     if (a.length !== b.length) return false;
     for (let i = 0; i < a.length; i++) {
       const x = a[i], y = b[i];
-      if (x.id !== y.id || x.name !== y.name || x.category !== y.category ||
+      if (x.name !== y.name || x.category !== y.category ||
           x.cost !== y.cost || x.users !== y.users || x.usage !== y.usage) return false;
     }
     return true;
@@ -1087,18 +1092,35 @@ export function DashboardApp() {
     { key: "roi", icon: "📈", klass: "blue", title: t("cards.roi.title"), desc: t("cards.roi.desc"), badge: t("cards.roi.badge"), shortcut: "Alt+4" },
   ];
 
+  const rates = useRates();
+  const ratesTs = rates.updatedAt
+    ? new Date(rates.updatedAt).toLocaleDateString(lang === "ar" ? "ar-EG-u-nu-latn" : "en-US", { month: "short", day: "numeric", year: "numeric" })
+    : "—";
+  const ratesTitle = rates.loading
+    ? t("rates.loading")
+    : rates.source === "fallback"
+      ? t("rates.fallback")
+      : t("rates.updated", { ts: ratesTs });
+
   return (
     <>
       <div className="bg-mesh" />
       <nav className="nav">
-        <div className="logo">
+        <Link to="/" className="logo" style={{ textDecoration: "none", color: "inherit" }}>
           <div className="logo-icon">MI</div>
           <span>Market Intelligence</span>
-        </div>
+        </Link>
         <div className="nav-actions">
-          <select className="nav-btn" value={currency} onChange={(e) => setCurrency(e.target.value as Currency)} title={t("currency.label")}>
+          <Link to="/" className="nav-btn">{t("nav.home")}</Link>
+          <Link to="/value" className="nav-btn">{t("nav.marketing.value")}</Link>
+          <Link to="/pricing" className="nav-btn">{t("nav.marketing.pricing")}</Link>
+          <Link to="/about" className="nav-btn">{t("nav.marketing.about")}</Link>
+          <select className="nav-btn" value={currency} onChange={(e) => setCurrency(e.target.value as Currency)} title={ratesTitle}>
             {CURRENCIES.map((c) => <option key={c.code} value={c.code}>{c.symbol} {c.code}</option>)}
           </select>
+          <span style={{ fontSize: "0.68rem", color: "var(--text3)", padding: "0 0.25rem" }} title={ratesTitle}>
+            {rates.loading ? "…" : rates.source === "fallback" ? "≈" : ratesTs}
+          </span>
           <select className="nav-btn" value={theme} onChange={(e) => setTheme(e.target.value as "dark" | "light" | "auto")} title={t("nav.theme")}>
             <option value="dark">🌙 {t("theme.dark")}</option>
             <option value="light">☀️ {t("theme.light")}</option>

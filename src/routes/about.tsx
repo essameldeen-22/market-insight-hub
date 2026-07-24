@@ -1,7 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useI18n } from "@/i18n/context";
 import { supabase } from "@/integrations/supabase/client";
+import { SiteNav, SiteFooter } from "@/components/SiteNav";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/about")({
 });
 
 function AboutPage() {
-  const { t, lang, setLang } = useI18n();
+  const { t } = useI18n();
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
@@ -36,17 +37,7 @@ function AboutPage() {
   return (
     <>
       <div className="bg-mesh" />
-      <nav className="nav">
-        <div className="logo"><div className="logo-icon">MI</div><span>Market Intelligence</span></div>
-        <div className="nav-actions">
-          <Link to="/" className="nav-btn">Home</Link>
-          <Link to="/app" className="nav-btn">{t("nav.app")}</Link>
-          <Link to="/value" className="nav-btn">{t("nav.marketing.value")}</Link>
-          <Link to="/pricing" className="nav-btn">{t("nav.marketing.pricing")}</Link>
-          <button className="nav-btn" onClick={() => setLang(lang === "ar" ? "en" : "ar")}>{t("nav.language")}</button>
-          <Link to="/auth" className="nav-btn primary">{t("nav.start")}</Link>
-        </div>
-      </nav>
+      <SiteNav />
       <section className="hero">
         <h1><span>{t("about.title")}</span></h1>
         <p>{t("about.body")}</p>
@@ -75,7 +66,7 @@ function AboutPage() {
           </form>
         </div>
       </div>
-      <div className="footer">{t("footer.tagline")}</div>
+      <SiteFooter />
     </>
   );
 }
