@@ -72,7 +72,7 @@ function TermsPage() {
             <p>Review text you submit is sent to Anthropic Claude for sentiment and topic analysis. Results are directional, not legal, financial, or investment advice. You are responsible for verifying findings before making business decisions.</p>
 
             <h3>5. Paid Subscriptions</h3>
-            <p>The Pro plan is billed monthly via Stripe. You can cancel any time and your service continues until the end of the current billing period. No refunds for past periods. Prices may change with 30 days&apos; notice.</p>
+            <p>Pro plan billing is not active yet; when enabled, it will be processed through a third-party payment provider. You can cancel any time and your service continues until the end of the current billing period. No refunds for past periods. Prices may change with 30 days&apos; notice.</p>
 
             <h3>6. Ownership</h3>
             <p>You retain all rights to data you upload. We retain all rights to the Service&apos;s code, design, and brand.</p>
