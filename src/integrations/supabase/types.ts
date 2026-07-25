@@ -14,12 +14,34 @@ export type Database = {
   }
   public: {
     Tables: {
+      analysis_usage: {
+        Row: {
+          count: number
+          day: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          count?: number
+          day: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          count?: number
+          day?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       competitor_analyses: {
         Row: {
           created_at: string
           id: string
           product_name: string
           result: Json | null
+          reviews_hash: string | null
           reviews_text: string
           updated_at: string
           user_id: string
@@ -29,6 +51,7 @@ export type Database = {
           id?: string
           product_name?: string
           result?: Json | null
+          reviews_hash?: string | null
           reviews_text?: string
           updated_at?: string
           user_id: string
@@ -38,6 +61,7 @@ export type Database = {
           id?: string
           product_name?: string
           result?: Json | null
+          reviews_hash?: string | null
           reviews_text?: string
           updated_at?: string
           user_id?: string
@@ -148,6 +172,39 @@ export type Database = {
         Update: {
           tools?: Json
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      value_props: {
+        Row: {
+          created_at: string
+          differentiator: string
+          id: string
+          pains: string
+          product: string
+          result: Json | null
+          target: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          differentiator?: string
+          id?: string
+          pains?: string
+          product?: string
+          result?: Json | null
+          target?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          differentiator?: string
+          id?: string
+          pains?: string
+          product?: string
+          result?: Json | null
+          target?: string
           user_id?: string
         }
         Relationships: []
