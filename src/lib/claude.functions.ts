@@ -87,10 +87,8 @@ export const analyzeReviewsFn = createServerFn({ method: "POST" })
     };
   });
 
-async function currentUsage(
-  supabase: { from: (t: string) => { select: (c: string) => { eq: (col: string, v: unknown) => { eq: (col: string, v: unknown) => { maybeSingle: () => Promise<{ data: { count?: number } | null }> } } } } },
-  uid: string,
-) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function currentUsage(supabase: any, uid: string) {
   const today = new Date().toISOString().slice(0, 10);
   const { data } = await supabase
     .from("analysis_usage")
@@ -98,11 +96,12 @@ async function currentUsage(
     .eq("user_id", uid)
     .eq("day", today)
     .maybeSingle();
-  return { count: data?.count ?? 0, limit: DAILY_FREE_LIMIT };
+  return { count: (data?.count as number | undefined) ?? 0, limit: DAILY_FREE_LIMIT };
 }
 
 async function loadPrevious(
-  supabase: { from: (t: string) => { select: (c: string) => { eq: (col: string, v: unknown) => { eq: (col: string, v: unknown) => { neq: (col: string, v: unknown) => { order: (c: string, o: { ascending: boolean }) => { limit: (n: number) => { maybeSingle: () => Promise<{ data: { result?: unknown; created_at?: string } | null }> } } } } } } }) },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
   uid: string,
   productName: string,
   currentHash: string,
@@ -118,5 +117,5 @@ async function loadPrevious(
     .limit(1)
     .maybeSingle();
   if (!data?.result) return null;
-  return { result: data.result as AnalysisResult, created_at: data.created_at ?? "" };
+  return { result: data.result as AnalysisResult, created_at: (data.created_at as string) ?? "" };
 }
