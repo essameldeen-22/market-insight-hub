@@ -3,13 +3,12 @@ import { z } from "zod";
 import { createHash } from "crypto";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { AnalysisResult } from "./claude.server";
+import { DAILY_FREE_LIMIT, dayKey, isRateLimited, nextUsage, usageForToday } from "./rate-limit";
 
 const AnalyzeInput = z.object({
   productName: z.string().max(200).default(""),
   reviews: z.array(z.string().min(1).max(2000)).min(1).max(200),
 });
-
-const DAILY_FREE_LIMIT = 3;
 
 function hashReviews(productName: string, reviews: string[]): string {
   const normalized =
@@ -48,7 +47,7 @@ export const analyzeReviewsFn = createServerFn({ method: "POST" })
 
     // 2. Rate limit gate — cache hits don't cost anything, but a real call does.
     const usage = await currentUsage(context.supabase, uid);
-    if (usage.count >= DAILY_FREE_LIMIT) {
+    if (isRateLimited(usage.count, DAILY_FREE_LIMIT)) {
       throw new Error("RATE_LIMIT_DAILY");
     }
 
@@ -71,11 +70,11 @@ export const analyzeReviewsFn = createServerFn({ method: "POST" })
     }
 
     // 5. Bump usage counter.
-    const today = new Date().toISOString().slice(0, 10);
+    const bumped = nextUsage(usage.count);
     await context.supabase
       .from("analysis_usage")
       .upsert(
-        { user_id: uid, day: today, count: usage.count + 1, updated_at: new Date().toISOString() },
+        { user_id: uid, ...bumped, updated_at: new Date().toISOString() },
         { onConflict: "user_id,day" },
       );
 
@@ -89,14 +88,14 @@ export const analyzeReviewsFn = createServerFn({ method: "POST" })
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function currentUsage(supabase: any, uid: string) {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = dayKey();
   const { data } = await supabase
     .from("analysis_usage")
-    .select("count")
+    .select("count, day")
     .eq("user_id", uid)
     .eq("day", today)
     .maybeSingle();
-  return { count: (data?.count as number | undefined) ?? 0, limit: DAILY_FREE_LIMIT };
+  return { count: usageForToday(data, today), limit: DAILY_FREE_LIMIT };
 }
 
 async function loadPrevious(

@@ -279,3 +279,39 @@ select.input-field { cursor:pointer; }
 ::-webkit-scrollbar{width:6px;}
 ::-webkit-scrollbar-track{background:var(--bg);}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+
+/* --- Force Western (Latin) digits everywhere, in every UI language. ---
+   Some Arabic fonts substitute ASCII digits with Arabic-Indic forms via the
+   `locl` OpenType feature when the element inherits lang="ar", and Chrome
+   localizes <input type="number"> by element locale. Rendering of numbers is
+   language-independent in this app: only labels translate, never digits. */
+input[type="number"],
+input[type="range"],
+.stat-value,
+.summary-card .value,
+.summary-card .amount,
+.tool-row input,
+.num,
+.mono-num {
+  font-family: 'Inter Variable', system-ui, -apple-system, sans-serif;
+  font-feature-settings: "locl" 0;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* --- Onboarding tour --- */
+.tour-overlay {
+  position: fixed; inset: 0; z-index: 120;
+  background: rgba(5,5,12,0.55); backdrop-filter: blur(2px);
+  display: flex; align-items: flex-end; justify-content: center; padding: 2rem;
+}
+.tour-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+  padding: 1.25rem 1.4rem; max-width: 420px; width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.tour-card h3 { margin: 0.25rem 0 0.5rem; font-size: 1.05rem; }
+.tour-card p { margin: 0; color: var(--text2); font-size: 0.88rem; line-height: 1.6; }
+.tour-step-count { font-size: 0.72rem; color: var(--text3); letter-spacing: 0.08em; }
+.tour-actions { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1rem; }
+.tour-highlight { outline: 2px solid var(--accent); outline-offset: 6px; border-radius: 14px; position: relative; z-index: 121; }

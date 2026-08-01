@@ -7,6 +7,11 @@ import { findAlternative, SAAS_CATEGORIES } from "@/lib/saas-alts";
 import { loadSaasStack, saveSaasStack, type SaasTool } from "@/lib/persistence.functions";
 import { track } from "@/lib/posthog";
 import { Card, exportElementToPdf, exportToCsv, useDebouncedEffect, fmtInt } from "./shared";
+import { historyReducer } from "./history";
+import { SAAS_TEMPLATES, templateTools, type TemplateKey } from "@/lib/saas-templates";
+import { SuggestionsPanel } from "./SuggestionsPanel";
+import { listCommunityAlternatives } from "@/lib/suggestions.functions";
+import type { SaasAlternative } from "@/lib/saas-alts";
 
 // --- CSV parser: bank/card statement style ---
 function parseCsvToTools(text: string): SaasTool[] {
@@ -68,51 +73,8 @@ function parseCsvToTools(text: string): SaasTool[] {
   return tools;
 }
 
-// --- History reducer: single-source atomic past/present/future ---
-type HistoryState = { past: SaasTool[][]; present: SaasTool[]; future: SaasTool[][] };
-type HistoryAction =
-  | { type: "set"; value: SaasTool[] }
-  | { type: "replace"; value: SaasTool[] } // no history push (initial load)
-  | { type: "undo" }
-  | { type: "redo" };
-
-const MAX_HISTORY = 50;
-
-function sameTools(a: SaasTool[], b: SaasTool[]) {
-  if (a === b) return true;
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) {
-    const x = a[i], y = b[i];
-    if (x.name !== y.name || x.category !== y.category || x.cost !== y.cost || x.users !== y.users || x.usage !== y.usage) return false;
-  }
-  return true;
-}
-
-function historyReducer(state: HistoryState, action: HistoryAction): HistoryState {
-  switch (action.type) {
-    case "replace":
-      return { past: [], present: action.value, future: [] };
-    case "set": {
-      if (sameTools(state.present, action.value)) return state; // no-op → no push
-      const past = [...state.past, state.present];
-      if (past.length > MAX_HISTORY) past.shift();
-      return { past, present: action.value, future: [] };
-    }
-    case "undo": {
-      if (state.past.length === 0) return state;
-      const prev = state.past[state.past.length - 1];
-      return { past: state.past.slice(0, -1), present: prev, future: [state.present, ...state.future] };
-    }
-    case "redo": {
-      if (state.future.length === 0) return state;
-      const next = state.future[0];
-      return { past: [...state.past, state.present], present: next, future: state.future.slice(1) };
-    }
-  }
-}
-
 export function SaasAudit({ currency }: { currency: Currency }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const load = useServerFn(loadSaasStack);
   const save = useServerFn(saveSaasStack);
   const [state, dispatch] = useReducer(historyReducer, { past: [], present: [], future: [] });
@@ -123,6 +85,38 @@ export function SaasAudit({ currency }: { currency: Currency }) {
   const [complexity, setComplexity] = useState(3);
   const [risk, setRisk] = useState(3);
 
+  // Approved community submissions extend the built-in alternatives database.
+  const loadCommunity = useServerFn(listCommunityAlternatives);
+  const [community, setCommunity] = useState<SaasAlternative[]>([]);
+  useEffect(() => {
+    loadCommunity()
+      .then((rows) =>
+        setCommunity(
+          rows.map((r) => ({
+            from: r.from_tool.toLowerCase(),
+            to: r.to_tool,
+            save: Number(r.save_pct),
+            difficulty: r.difficulty as SaasAlternative["difficulty"],
+            category: r.category,
+          })),
+        ),
+      )
+      .catch(() => {});
+  }, [loadCommunity]);
+
+  const lookupAlt = useCallback(
+    (name: string): SaasAlternative | undefined => {
+      const key = name.trim().toLowerCase();
+      if (!key) return undefined;
+      return (
+        community.find((a) => a.from === key) ??
+        community.find((a) => key.includes(a.from)) ??
+        findAlternative(name)
+      );
+    },
+    [community],
+  );
+
   useEffect(() => {
     load().then((rows) => {
       dispatch({
@@ -132,6 +126,7 @@ export function SaasAudit({ currency }: { currency: Currency }) {
       setHydrated(true);
     }).catch(() => setHydrated(true));
   }, [load]);
+
 
   useDebouncedEffect(() => {
     if (!hydrated) return;
@@ -161,6 +156,11 @@ export function SaasAudit({ currency }: { currency: Currency }) {
   const remove = (id: string) => applyTools((prev) => prev.filter((x) => x.id !== id));
   const add = () => applyTools((prev) => [...prev, { id: crypto.randomUUID(), name: "", category: "", cost: 0, users: 1, usage: 100 }]);
   const clear = () => applyTools([]);
+  const loadTemplate = (key: TemplateKey) => {
+    applyTools(templateTools(key));
+    track("saas_template_loaded", { template: key });
+  };
+  const isEmptyStack = tools.filter((x) => x.name.trim()).length === 0;
   const demo = () => {
     applyTools([
       { id: crypto.randomUUID(), name: "Salesforce", category: "CRM", cost: 150, users: 10, usage: 60 },
@@ -194,14 +194,14 @@ export function SaasAudit({ currency }: { currency: Currency }) {
       const monthly = (t.cost || 0) * (t.users || 1);
       const yearly = monthly * 12;
       annual += yearly;
-      const alt = findAlternative(t.name);
+      const alt = lookupAlt(t.name);
       if (alt) { migratable += 1; savings += yearly * alt.save; }
       if (yearly > topCost.value) topCost = { name: t.name || "—", value: yearly };
       if ((t.usage ?? 100) < lowUse.pct && t.name) lowUse = { name: t.name, pct: t.usage ?? 0 };
       waste += yearly * (1 - (t.usage ?? 100) / 100);
     }
     return { annual, savings, waste, topCost, lowUse, migratable };
-  }, [tools]);
+  }, [tools, lookupAlt]);
 
   const migrationCost = useMemo(() => {
     if (stats.migratable === 0) return 0;
@@ -234,8 +234,8 @@ export function SaasAudit({ currency }: { currency: Currency }) {
   }, [tools]);
 
   const migrations = useMemo(
-    () => tools.filter((t) => t.name).map((t) => ({ tool: t, alt: findAlternative(t.name) })).filter((x) => x.alt),
-    [tools],
+    () => tools.filter((t) => t.name).map((t) => ({ tool: t, alt: lookupAlt(t.name) })).filter((x) => x.alt),
+    [tools, lookupAlt],
   );
 
   const insights = useMemo(() => {
@@ -277,7 +277,7 @@ export function SaasAudit({ currency }: { currency: Currency }) {
     <div ref={reportRef}>
       <div className="panel-header">
         <h2><span className="icon-lead">💼</span> {t("panels.saas.h2")}</h2>
-        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+        <div id="tour-data" style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
           <button className="btn btn-outline btn-sm" onClick={undo} disabled={!canUndo} title="Ctrl+Z">↶ {t("panels.saas.undo")}</button>
           <button className="btn btn-outline btn-sm" onClick={redo} disabled={!canRedo} title="Ctrl+Y">↷ {t("panels.saas.redo")}</button>
           <label className="btn btn-outline btn-sm" style={{ cursor: "pointer" }}>
@@ -302,8 +302,24 @@ export function SaasAudit({ currency }: { currency: Currency }) {
 
       <div className="dashboard-grid">
         <div className="left-col">
+          {isEmptyStack && (
+            <Card title={<><span className="icon-lead">🚀</span> {t("templates.title")}</>}>
+              <div style={{ fontSize: "0.78rem", color: "var(--text3)", marginBottom: "0.75rem" }}>{t("templates.hint")}</div>
+              <div style={{ display: "grid", gap: "0.6rem", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))" }}>
+                {SAAS_TEMPLATES.map((tpl) => (
+                  <button key={tpl.key} className="btn btn-outline btn-sm" style={{ flexDirection: "column", alignItems: "flex-start", textAlign: "start", padding: "0.7rem 0.8rem" }} onClick={() => loadTemplate(tpl.key)}>
+                    <span style={{ fontSize: "1.1rem" }}>{tpl.icon}</span>
+                    <strong style={{ fontSize: "0.85rem" }}>{tpl.label[lang]}</strong>
+                    <span style={{ fontSize: "0.72rem", color: "var(--text3)", fontWeight: 400 }}>{tpl.desc[lang]}</span>
+                  </button>
+                ))}
+              </div>
+            </Card>
+          )}
+
           <Card title={<><span className="icon-lead">🛠️</span> {t("panels.saas.tools_title")}</>}>
             <div style={{ fontSize: "0.72rem", color: "var(--text3)", marginBottom: "0.5rem" }}>{t("panels.saas.csv_hint")}</div>
+
             <div className="tool-row-grid header">
               <div>{t("panels.saas.header_name")}</div>
               <div>{t("panels.saas.header_cat")}</div>
@@ -377,7 +393,10 @@ export function SaasAudit({ currency }: { currency: Currency }) {
               </div>
             </div>
           </Card>
+
+          <SuggestionsPanel />
         </div>
+
 
         <div className="right-col">
           <div className="summary-card">

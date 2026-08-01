@@ -34,7 +34,7 @@ function TermsPage() {
             <p>باستخدامك Market Intelligence Suite (&quot;الخدمة&quot;) فأنت توافق على هذه الشروط. إن لم توافق، فلا تستخدم الخدمة.</p>
 
             <h3>٢. الحسابات</h3>
-            <p>أنت مسؤول عن الحفاظ على سرية بيانات الدخول وعن جميع الأنشطة التي تحدث ضمن حسابك. عمرك ١٦ عاماً فأكثر لإنشاء حساب.</p>
+            <p>أنت مسؤول عن الحفاظ على سرية بيانات الدخول وعن جميع الأنشطة التي تحدث ضمن حسابك. يجب أن يكون عمرك ١٨ عاماً فأكثر لإنشاء حساب.</p>
 
             <h3>٣. الاستخدام المقبول</h3>
             <p>ممنوع: (أ) إدخال بيانات مسروقة أو منتهكة لحقوق الملكية الفكرية أو محتوى غير قانوني، (ب) محاولة اختراق أو إساءة استخدام البنية التحتية، (ج) استخدام تلقائي لكشط بيانات مراجعات من طرف ثالث بشكل ينتهك شروطهم (Amazon, Google, Trustpilot, …). أنت مسؤول قانونياً عن مصدر أي مراجعات تلصقها في الأداة.</p>
@@ -55,7 +55,7 @@ function TermsPage() {
             <p>يحق لك حذف حسابك في أي وقت من إعدادات لوحة التحكم — وسيتم حذف جميع بياناتك نهائياً. يحق لنا تعليق حسابات تنتهك هذه الشروط.</p>
 
             <h3>٩. القانون الحاكم</h3>
-            <p>تخضع هذه الشروط للقانون المعمول به في مقر تسجيل الخدمة، وتُحل النزاعات ودياً أولاً.</p>
+            <p>لم تُسجَّل الخدمة بعد ككيان قانوني رسمي. سيُحدَّد القانون الحاكم والاختصاص القضائي صراحةً في هذه الصفحة فور إتمام تسجيل الخدمة رسمياً من قِبل مالكها/مشغّلها، وسنخطر المستخدمين بذلك. حتى ذلك الحين تُحل النزاعات ودياً عبر التواصل المباشر.</p>
           </>
         ) : (
           <>
@@ -63,7 +63,7 @@ function TermsPage() {
             <p>By using Market Intelligence Suite (&quot;the Service&quot;) you agree to these Terms. If you don&apos;t agree, don&apos;t use the Service.</p>
 
             <h3>2. Accounts</h3>
-            <p>You are responsible for keeping your credentials confidential and for everything that happens under your account. You must be 16 or older to create an account.</p>
+            <p>You are responsible for keeping your credentials confidential and for everything that happens under your account. You must be 18 or older to create an account.</p>
 
             <h3>3. Acceptable Use</h3>
             <p>You will not: (a) submit stolen, IP-infringing, or unlawful content; (b) probe, attack, or abuse our infrastructure; (c) use the tool to automate scraping of third-party review sources (Amazon, Google, Trustpilot, etc.) in violation of their terms. You are legally responsible for the source of any review text you paste into the tool.</p>
@@ -84,7 +84,7 @@ function TermsPage() {
             <p>You can delete your account at any time from the dashboard settings — all your data is permanently removed. We may suspend accounts that violate these Terms.</p>
 
             <h3>9. Governing Law</h3>
-            <p>These Terms are governed by the law of the Service&apos;s registered jurisdiction. Disputes are first resolved amicably.</p>
+            <p>The Service is not yet incorporated as a formal legal entity. The governing law and jurisdiction will be specified explicitly on this page once the Service is formally registered by its owner/operator, and users will be notified of the change. Until then, disputes are resolved amicably through direct contact.</p>
           </>
         )}
       </article>

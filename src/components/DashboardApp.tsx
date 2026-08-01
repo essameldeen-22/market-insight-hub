@@ -18,6 +18,7 @@ import { useRates } from "@/lib/rates";
 import { identify, track } from "@/lib/posthog";
 import { deleteMyAccount } from "@/lib/account.functions";
 import { SiteNav } from "@/components/SiteNav";
+import { OnboardingTour } from "@/components/OnboardingTour";
 import { CompetitorAnalysis } from "@/components/dashboard/CompetitorAnalysis";
 import { SaasAudit } from "@/components/dashboard/SaasAudit";
 import { PricingCalculator } from "@/components/dashboard/PricingCalculator";
@@ -110,7 +111,7 @@ export function DashboardApp() {
   const ratesTitle = rates.loading ? t("rates.loading") : rates.source === "fallback" ? t("rates.fallback") : t("rates.updated", { ts: ratesTs });
 
   const extras = (
-    <>
+    <span id="tour-controls" style={{ display: "contents" }}>
       <select className="nav-btn" value={currency} onChange={(e) => setCurrency(e.target.value as Currency)} title={ratesTitle}>
         {CURRENCIES.map((c) => <option key={c.code} value={c.code}>{c.symbol} {c.code}</option>)}
       </select>
@@ -127,7 +128,7 @@ export function DashboardApp() {
       <button className="nav-btn" onClick={runDelete} disabled={deleting} style={{ color: "var(--danger)" }}>
         {deleting ? t("delete.deleting") : `🗑 ${t("nav.delete_account")}`}
       </button>
-    </>
+    </span>
   );
 
   const setModule = (k: ModuleKey) => {
@@ -145,7 +146,7 @@ export function DashboardApp() {
         <h1><span>{t("hero.title.a")}</span> {t("hero.title.b")}</h1>
       </section>
 
-      <div className="tools-grid">
+      <div className="tools-grid" id="tour-tools">
         {cards.map((c) => (
           <div key={c.key} className={`tool-card ${active === c.key ? "active" : ""}`} onClick={() => setModule(c.key)}>
             <div className={`tool-icon ${c.klass}`}>{c.icon}</div>
@@ -164,6 +165,8 @@ export function DashboardApp() {
       <div className={`app-panel ${active === "pricing" ? "active" : ""}`}>{active === "pricing" && <PricingCalculator currency={currency} />}</div>
       <div className={`app-panel ${active === "roi" ? "active" : ""}`}>{active === "roi" && <RoiCalculator currency={currency} />}</div>
       <div className={`app-panel ${active === "vp" ? "active" : ""}`}>{active === "vp" && <ValueProp />}</div>
+
+      <OnboardingTour />
 
       <div className="footer">{t("footer.tagline")}</div>
     </>

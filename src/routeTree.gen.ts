@@ -17,7 +17,11 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GuidesSaasPricingStrategyRouteImport } from './routes/guides/saas-pricing-strategy'
+import { Route as GuidesSaasCostAuditRouteImport } from './routes/guides/saas-cost-audit'
+import { Route as GuidesCompetitorReviewAnalysisRouteImport } from './routes/guides/competitor-review-analysis'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 
 const ValueRoute = ValueRouteImport.update({
   id: '/value',
@@ -58,9 +62,31 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuidesSaasPricingStrategyRoute =
+  GuidesSaasPricingStrategyRouteImport.update({
+    id: '/guides/saas-pricing-strategy',
+    path: '/guides/saas-pricing-strategy',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const GuidesSaasCostAuditRoute = GuidesSaasCostAuditRouteImport.update({
+  id: '/guides/saas-cost-audit',
+  path: '/guides/saas-cost-audit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuidesCompetitorReviewAnalysisRoute =
+  GuidesCompetitorReviewAnalysisRouteImport.update({
+    id: '/guides/competitor-review-analysis',
+    path: '/guides/competitor-review-analysis',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
   id: '/app',
   path: '/app',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 
@@ -72,7 +98,11 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/value': typeof ValueRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/app': typeof AuthenticatedAppRoute
+  '/guides/competitor-review-analysis': typeof GuidesCompetitorReviewAnalysisRoute
+  '/guides/saas-cost-audit': typeof GuidesSaasCostAuditRoute
+  '/guides/saas-pricing-strategy': typeof GuidesSaasPricingStrategyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -82,7 +112,11 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/value': typeof ValueRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/app': typeof AuthenticatedAppRoute
+  '/guides/competitor-review-analysis': typeof GuidesCompetitorReviewAnalysisRoute
+  '/guides/saas-cost-audit': typeof GuidesSaasCostAuditRoute
+  '/guides/saas-pricing-strategy': typeof GuidesSaasPricingStrategyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -94,7 +128,11 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/value': typeof ValueRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/app': typeof AuthenticatedAppRoute
+  '/guides/competitor-review-analysis': typeof GuidesCompetitorReviewAnalysisRoute
+  '/guides/saas-cost-audit': typeof GuidesSaasCostAuditRoute
+  '/guides/saas-pricing-strategy': typeof GuidesSaasPricingStrategyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -106,7 +144,11 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/terms'
     | '/value'
+    | '/admin'
     | '/app'
+    | '/guides/competitor-review-analysis'
+    | '/guides/saas-cost-audit'
+    | '/guides/saas-pricing-strategy'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -116,7 +158,11 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/terms'
     | '/value'
+    | '/admin'
     | '/app'
+    | '/guides/competitor-review-analysis'
+    | '/guides/saas-cost-audit'
+    | '/guides/saas-pricing-strategy'
   id:
     | '__root__'
     | '/'
@@ -127,7 +173,11 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/terms'
     | '/value'
+    | '/_authenticated/admin'
     | '/_authenticated/app'
+    | '/guides/competitor-review-analysis'
+    | '/guides/saas-cost-audit'
+    | '/guides/saas-pricing-strategy'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -139,6 +189,9 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
   ValueRoute: typeof ValueRoute
+  GuidesCompetitorReviewAnalysisRoute: typeof GuidesCompetitorReviewAnalysisRoute
+  GuidesSaasCostAuditRoute: typeof GuidesSaasCostAuditRoute
+  GuidesSaasPricingStrategyRoute: typeof GuidesSaasPricingStrategyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -199,6 +252,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guides/saas-pricing-strategy': {
+      id: '/guides/saas-pricing-strategy'
+      path: '/guides/saas-pricing-strategy'
+      fullPath: '/guides/saas-pricing-strategy'
+      preLoaderRoute: typeof GuidesSaasPricingStrategyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/saas-cost-audit': {
+      id: '/guides/saas-cost-audit'
+      path: '/guides/saas-cost-audit'
+      fullPath: '/guides/saas-cost-audit'
+      preLoaderRoute: typeof GuidesSaasCostAuditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/competitor-review-analysis': {
+      id: '/guides/competitor-review-analysis'
+      path: '/guides/competitor-review-analysis'
+      fullPath: '/guides/competitor-review-analysis'
+      preLoaderRoute: typeof GuidesCompetitorReviewAnalysisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/app': {
       id: '/_authenticated/app'
       path: '/app'
@@ -206,14 +280,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedAppRoute: typeof AuthenticatedAppRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedAppRoute: AuthenticatedAppRoute,
 }
 
@@ -229,7 +312,20 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
   ValueRoute: ValueRoute,
+  GuidesCompetitorReviewAnalysisRoute: GuidesCompetitorReviewAnalysisRoute,
+  GuidesSaasCostAuditRoute: GuidesSaasCostAuditRoute,
+  GuidesSaasPricingStrategyRoute: GuidesSaasPricingStrategyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
