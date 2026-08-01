@@ -302,8 +302,24 @@ export function SaasAudit({ currency }: { currency: Currency }) {
 
       <div className="dashboard-grid">
         <div className="left-col">
+          {isEmptyStack && (
+            <Card title={<><span className="icon-lead">🚀</span> {t("templates.title")}</>}>
+              <div style={{ fontSize: "0.78rem", color: "var(--text3)", marginBottom: "0.75rem" }}>{t("templates.hint")}</div>
+              <div style={{ display: "grid", gap: "0.6rem", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))" }}>
+                {SAAS_TEMPLATES.map((tpl) => (
+                  <button key={tpl.key} className="btn btn-outline btn-sm" style={{ flexDirection: "column", alignItems: "flex-start", textAlign: "start", padding: "0.7rem 0.8rem" }} onClick={() => loadTemplate(tpl.key)}>
+                    <span style={{ fontSize: "1.1rem" }}>{tpl.icon}</span>
+                    <strong style={{ fontSize: "0.85rem" }}>{tpl.label[lang]}</strong>
+                    <span style={{ fontSize: "0.72rem", color: "var(--text3)", fontWeight: 400 }}>{tpl.desc[lang]}</span>
+                  </button>
+                ))}
+              </div>
+            </Card>
+          )}
+
           <Card title={<><span className="icon-lead">🛠️</span> {t("panels.saas.tools_title")}</>}>
             <div style={{ fontSize: "0.72rem", color: "var(--text3)", marginBottom: "0.5rem" }}>{t("panels.saas.csv_hint")}</div>
+
             <div className="tool-row-grid header">
               <div>{t("panels.saas.header_name")}</div>
               <div>{t("panels.saas.header_cat")}</div>
