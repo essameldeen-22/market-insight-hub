@@ -74,7 +74,7 @@ function parseCsvToTools(text: string): SaasTool[] {
 }
 
 export function SaasAudit({ currency }: { currency: Currency }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const load = useServerFn(loadSaasStack);
   const save = useServerFn(saveSaasStack);
   const [state, dispatch] = useReducer(historyReducer, { past: [], present: [], future: [] });
