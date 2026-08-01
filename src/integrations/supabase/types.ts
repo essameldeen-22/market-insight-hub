@@ -92,6 +92,57 @@ export type Database = {
         }
         Relationships: []
       }
+      pending_suggestions: {
+        Row: {
+          category: string
+          created_at: string
+          difficulty: string
+          from_tool: string
+          id: string
+          notes: string | null
+          review_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          save_pct: number
+          status: string
+          to_tool: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          difficulty: string
+          from_tool: string
+          id?: string
+          notes?: string | null
+          review_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          save_pct: number
+          status?: string
+          to_tool: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          difficulty?: string
+          from_tool?: string
+          id?: string
+          notes?: string | null
+          review_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          save_pct?: number
+          status?: string
+          to_tool?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       pricing_states: {
         Row: {
           state: Json
@@ -114,6 +165,7 @@ export type Database = {
         Row: {
           created_at: string
           display_name: string | null
+          has_seen_onboarding: boolean
           id: string
           preferred_currency: string
           preferred_language: string
@@ -123,6 +175,7 @@ export type Database = {
         Insert: {
           created_at?: string
           display_name?: string | null
+          has_seen_onboarding?: boolean
           id: string
           preferred_currency?: string
           preferred_language?: string
@@ -132,6 +185,7 @@ export type Database = {
         Update: {
           created_at?: string
           display_name?: string | null
+          has_seen_onboarding?: boolean
           id?: string
           preferred_currency?: string
           preferred_language?: string
@@ -158,6 +212,42 @@ export type Database = {
         }
         Relationships: []
       }
+      saas_alternatives: {
+        Row: {
+          category: string
+          created_at: string
+          difficulty: string
+          from_tool: string
+          id: string
+          notes: string | null
+          save_pct: number
+          to_tool: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          difficulty: string
+          from_tool: string
+          id?: string
+          notes?: string | null
+          save_pct: number
+          to_tool: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          difficulty?: string
+          from_tool?: string
+          id?: string
+          notes?: string | null
+          save_pct?: number
+          to_tool?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       saas_stacks: {
         Row: {
           tools: Json
@@ -172,6 +262,27 @@ export type Database = {
         Update: {
           tools?: Json
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
         Relationships: []
@@ -214,10 +325,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -344,6 +461,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+    },
   },
 } as const
