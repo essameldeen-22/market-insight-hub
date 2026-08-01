@@ -156,6 +156,11 @@ export function SaasAudit({ currency }: { currency: Currency }) {
   const remove = (id: string) => applyTools((prev) => prev.filter((x) => x.id !== id));
   const add = () => applyTools((prev) => [...prev, { id: crypto.randomUUID(), name: "", category: "", cost: 0, users: 1, usage: 100 }]);
   const clear = () => applyTools([]);
+  const loadTemplate = (key: TemplateKey) => {
+    applyTools(templateTools(key));
+    track("saas_template_loaded", { template: key });
+  };
+  const isEmptyStack = tools.filter((x) => x.name.trim()).length === 0;
   const demo = () => {
     applyTools([
       { id: crypto.randomUUID(), name: "Salesforce", category: "CRM", cost: 150, users: 10, usage: 60 },
@@ -189,14 +194,14 @@ export function SaasAudit({ currency }: { currency: Currency }) {
       const monthly = (t.cost || 0) * (t.users || 1);
       const yearly = monthly * 12;
       annual += yearly;
-      const alt = findAlternative(t.name);
+      const alt = lookupAlt(t.name);
       if (alt) { migratable += 1; savings += yearly * alt.save; }
       if (yearly > topCost.value) topCost = { name: t.name || "—", value: yearly };
       if ((t.usage ?? 100) < lowUse.pct && t.name) lowUse = { name: t.name, pct: t.usage ?? 0 };
       waste += yearly * (1 - (t.usage ?? 100) / 100);
     }
     return { annual, savings, waste, topCost, lowUse, migratable };
-  }, [tools]);
+  }, [tools, lookupAlt]);
 
   const migrationCost = useMemo(() => {
     if (stats.migratable === 0) return 0;
@@ -229,8 +234,8 @@ export function SaasAudit({ currency }: { currency: Currency }) {
   }, [tools]);
 
   const migrations = useMemo(
-    () => tools.filter((t) => t.name).map((t) => ({ tool: t, alt: findAlternative(t.name) })).filter((x) => x.alt),
-    [tools],
+    () => tools.filter((t) => t.name).map((t) => ({ tool: t, alt: lookupAlt(t.name) })).filter((x) => x.alt),
+    [tools, lookupAlt],
   );
 
   const insights = useMemo(() => {
