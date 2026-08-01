@@ -85,6 +85,38 @@ export function SaasAudit({ currency }: { currency: Currency }) {
   const [complexity, setComplexity] = useState(3);
   const [risk, setRisk] = useState(3);
 
+  // Approved community submissions extend the built-in alternatives database.
+  const loadCommunity = useServerFn(listCommunityAlternatives);
+  const [community, setCommunity] = useState<SaasAlternative[]>([]);
+  useEffect(() => {
+    loadCommunity()
+      .then((rows) =>
+        setCommunity(
+          rows.map((r) => ({
+            from: r.from_tool.toLowerCase(),
+            to: r.to_tool,
+            save: Number(r.save_pct),
+            difficulty: r.difficulty as SaasAlternative["difficulty"],
+            category: r.category,
+          })),
+        ),
+      )
+      .catch(() => {});
+  }, [loadCommunity]);
+
+  const lookupAlt = useCallback(
+    (name: string): SaasAlternative | undefined => {
+      const key = name.trim().toLowerCase();
+      if (!key) return undefined;
+      return (
+        community.find((a) => a.from === key) ??
+        community.find((a) => key.includes(a.from)) ??
+        findAlternative(name)
+      );
+    },
+    [community],
+  );
+
   useEffect(() => {
     load().then((rows) => {
       dispatch({
@@ -94,6 +126,7 @@ export function SaasAudit({ currency }: { currency: Currency }) {
       setHydrated(true);
     }).catch(() => setHydrated(true));
   }, [load]);
+
 
   useDebouncedEffect(() => {
     if (!hydrated) return;
