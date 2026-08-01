@@ -277,7 +277,7 @@ export function SaasAudit({ currency }: { currency: Currency }) {
     <div ref={reportRef}>
       <div className="panel-header">
         <h2><span className="icon-lead">💼</span> {t("panels.saas.h2")}</h2>
-        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+        <div id="tour-data" style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
           <button className="btn btn-outline btn-sm" onClick={undo} disabled={!canUndo} title="Ctrl+Z">↶ {t("panels.saas.undo")}</button>
           <button className="btn btn-outline btn-sm" onClick={redo} disabled={!canRedo} title="Ctrl+Y">↷ {t("panels.saas.redo")}</button>
           <label className="btn btn-outline btn-sm" style={{ cursor: "pointer" }}>
