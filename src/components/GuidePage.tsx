@@ -1,5 +1,4 @@
 // Shared layout for the Arabic-first SEO guide pages.
-import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { SiteNav, SiteFooter } from "@/components/SiteNav";
 import { useI18n } from "@/i18n/context";
@@ -71,15 +70,6 @@ export function GuidePage({
       <SiteFooter />
     </>
   );
-}
-
-export function guideJsonLd(o: {
-  headline: string;
-  description: string;
-  url: string;
-  inLanguage: string;
-}): ReactNode {
-  return null; // JSON-LD is injected through route head() scripts instead.
 }
 
 export function articleLd(headline: string, description: string, url: string, inLanguage = "ar") {
