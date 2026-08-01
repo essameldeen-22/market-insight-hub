@@ -393,7 +393,10 @@ export function SaasAudit({ currency }: { currency: Currency }) {
               </div>
             </div>
           </Card>
+
+          <SuggestionsPanel />
         </div>
+
 
         <div className="right-col">
           <div className="summary-card">
