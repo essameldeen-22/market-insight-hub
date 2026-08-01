@@ -7,6 +7,11 @@ import { findAlternative, SAAS_CATEGORIES } from "@/lib/saas-alts";
 import { loadSaasStack, saveSaasStack, type SaasTool } from "@/lib/persistence.functions";
 import { track } from "@/lib/posthog";
 import { Card, exportElementToPdf, exportToCsv, useDebouncedEffect, fmtInt } from "./shared";
+import { historyReducer } from "./history";
+import { SAAS_TEMPLATES, templateTools, type TemplateKey } from "@/lib/saas-templates";
+import { SuggestionsPanel } from "./SuggestionsPanel";
+import { listCommunityAlternatives } from "@/lib/suggestions.functions";
+import type { SaasAlternative } from "@/lib/saas-alts";
 
 // --- CSV parser: bank/card statement style ---
 function parseCsvToTools(text: string): SaasTool[] {
@@ -66,49 +71,6 @@ function parseCsvToTools(text: string): SaasTool[] {
     }
   }
   return tools;
-}
-
-// --- History reducer: single-source atomic past/present/future ---
-type HistoryState = { past: SaasTool[][]; present: SaasTool[]; future: SaasTool[][] };
-type HistoryAction =
-  | { type: "set"; value: SaasTool[] }
-  | { type: "replace"; value: SaasTool[] } // no history push (initial load)
-  | { type: "undo" }
-  | { type: "redo" };
-
-const MAX_HISTORY = 50;
-
-function sameTools(a: SaasTool[], b: SaasTool[]) {
-  if (a === b) return true;
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) {
-    const x = a[i], y = b[i];
-    if (x.name !== y.name || x.category !== y.category || x.cost !== y.cost || x.users !== y.users || x.usage !== y.usage) return false;
-  }
-  return true;
-}
-
-function historyReducer(state: HistoryState, action: HistoryAction): HistoryState {
-  switch (action.type) {
-    case "replace":
-      return { past: [], present: action.value, future: [] };
-    case "set": {
-      if (sameTools(state.present, action.value)) return state; // no-op → no push
-      const past = [...state.past, state.present];
-      if (past.length > MAX_HISTORY) past.shift();
-      return { past, present: action.value, future: [] };
-    }
-    case "undo": {
-      if (state.past.length === 0) return state;
-      const prev = state.past[state.past.length - 1];
-      return { past: state.past.slice(0, -1), present: prev, future: [state.present, ...state.future] };
-    }
-    case "redo": {
-      if (state.future.length === 0) return state;
-      const next = state.future[0];
-      return { past: [...state.past, state.present], present: next, future: state.future.slice(1) };
-    }
-  }
 }
 
 export function SaasAudit({ currency }: { currency: Currency }) {
