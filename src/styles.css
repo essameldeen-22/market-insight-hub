@@ -391,3 +391,6 @@ input[type="range"],
   .landing-tools .tool-card, .landing-tools .tool-icon { transition: none; }
   .landing-tools .tool-card:hover { transform: none; }
 }
+
+/* Landing contrast pass: lift muted labels off dark surfaces to meet AA */
+.landing-tools .tool-badge { color: var(--text2); }
