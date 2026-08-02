@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useI18n } from "@/i18n/context";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteNav, SiteFooter } from "@/components/SiteNav";
+import { Reveal, CountUp, HeroVisual } from "@/components/landing/motion";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -40,26 +41,42 @@ function Landing() {
     else navigate({ to: "/auth" });
   };
 
+  // Split the hero subtitle around its "80%" stat so it can count up.
+  const [subA, subB] = t("hero.subtitle").split("80%");
+
   return (
     <>
       <div className="bg-mesh" />
       <SiteNav />
 
-      <section className="hero">
-        <div className="badge"><span className="badge-dot" />{t("hero.badge")}</div>
-        <h1><span>{t("hero.title.a")}</span> {t("hero.title.b")}</h1>
-        <p>{t("hero.subtitle")}</p>
-        <button className="nav-btn primary" style={{ padding: "0.75rem 1.5rem", fontSize: "0.95rem" }} onClick={cta}>{t("hero.cta")} →</button>
+      <section className="hero landing-hero">
+        <HeroVisual />
+        <div className="hero-content">
+          <Reveal className="badge-wrap"><div className="badge"><span className="badge-dot" />{t("hero.badge")}</div></Reveal>
+          <Reveal delay={80}><h1><span>{t("hero.title.a")}</span> {t("hero.title.b")}</h1></Reveal>
+          <Reveal delay={160}>
+            <p>
+              {subA}
+              {subB !== undefined && <><CountUp to={80} suffix="%" />{subB}</>}
+            </p>
+          </Reveal>
+          <Reveal delay={240}>
+            <button className="nav-btn primary hero-cta" onClick={cta}>{t("hero.cta")} →</button>
+          </Reveal>
+        </div>
       </section>
 
-      <div className="tools-grid">
-        {cards.map((c) => (
-          <div key={c.title} className="tool-card" onClick={cta}>
-            <div className={`tool-icon ${c.klass}`}>{c.icon}</div>
-            <h3>{c.title}</h3>
-            <p>{c.desc}</p>
-            <span className="tool-badge">{c.badge}</span>
-          </div>
+      <div className="tools-grid landing-tools">
+        {cards.map((c, i) => (
+          <Reveal key={c.title} delay={i * 90}>
+            <div className="tool-card" onClick={cta} role="button" tabIndex={0}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); cta(); } }}>
+              <div className={`tool-icon ${c.klass}`}>{c.icon}</div>
+              <h3>{c.title}</h3>
+              <p>{c.desc}</p>
+              <span className="tool-badge">{c.badge}</span>
+            </div>
+          </Reveal>
         ))}
       </div>
 
