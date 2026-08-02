@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useI18n } from "@/i18n/context";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteNav, SiteFooter } from "@/components/SiteNav";
+import { Reveal, CountUp, HeroVisual } from "@/components/landing/motion";
 
 export const Route = createFileRoute("/")({
   head: () => ({
