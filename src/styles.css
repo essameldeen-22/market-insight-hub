@@ -394,3 +394,27 @@ input[type="range"],
 
 /* Landing contrast pass: lift muted labels off dark surfaces to meet AA */
 .landing-tools .tool-badge { color: var(--text2); }
+
+/* ===== Dashboard motion (Task 1) ===== */
+.dash-skeleton-wrap { display: grid; gap: 0.6rem; padding: 0.25rem 0; }
+.dash-skeleton-label { font-size: 0.8rem; color: var(--text2); margin-bottom: 0.2rem; }
+.dash-skeleton-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; }
+.dash-skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.11) 37%, rgba(255,255,255,0.05) 63%);
+  background-size: 400% 100%;
+  animation: dashShimmer 1.4s ease-in-out infinite;
+}
+.light-mode .dash-skeleton {
+  background: linear-gradient(90deg, rgba(0,0,0,0.05) 25%, rgba(0,0,0,0.1) 37%, rgba(0,0,0,0.05) 63%);
+  background-size: 400% 100%;
+}
+@keyframes dashShimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+
+/* Soft fade + slide when a fresh result renders */
+.result-enter { animation: resultEnter 0.45s ease-out both; }
+@keyframes resultEnter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .dash-skeleton { animation: none; }
+  .result-enter { animation: none; }
+}

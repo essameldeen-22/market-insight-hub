@@ -4,7 +4,9 @@ import { useI18n } from "@/i18n/context";
 import { analyzeReviewsFn } from "@/lib/claude.functions";
 import type { AnalysisResult } from "@/lib/claude.server";
 import { track } from "@/lib/posthog";
+import { CountUp } from "@/components/landing/motion";
 import { Card, exportElementToPdf, exportToCsv, fmtInt, fmtPct } from "./shared";
+import { SkeletonReport } from "./Animated";
 
 interface Competitor {
   id: string;
@@ -257,8 +259,14 @@ export function CompetitorAnalysis() {
               )}
             </Card>
 
-            {p.result && (
-              <>
+            {p.loading && (
+              <Card>
+                <SkeletonReport lines={5} label={t("panels.competitor.analyzing")} />
+              </Card>
+            )}
+
+            {!p.loading && p.result && (
+              <div className="result-enter" key={`res-${p.id}-${p.result.totalReviews}`}>
                 {p.previous && <ComparisonCard previous={p.previous.result} current={p.result} prevDate={p.previous.created_at} />}
                 <Card title={<><span className="icon-lead">🔥</span> {t("panels.competitor.topics_title")}</>}>
                   <TopicsList topics={p.result.topics} />
@@ -281,19 +289,23 @@ export function CompetitorAnalysis() {
                     </div>
                   ))}
                 </Card>
-              </>
+              </div>
             )}
           </div>
           <div className="right-col">
-            {p.result ? (
-              <>
+            {p.loading ? (
+              <Card>
+                <SkeletonReport lines={3} />
+              </Card>
+            ) : p.result ? (
+              <div className="result-enter">
                 <Card title={<><span className="icon-lead">📈</span> {t("panels.competitor.stats_title")}</>}>
                   <SentimentStats result={p.result} />
                 </Card>
                 <Card title={<><span className="icon-lead">💡</span> {t("panels.competitor.insights_title")}</>}>
                   <InsightsList result={p.result} />
                 </Card>
-              </>
+              </div>
             ) : (
               <Card>
                 <div style={{ padding: "1rem", textAlign: "center", color: "var(--text3)", fontSize: "0.85rem" }}>
@@ -302,6 +314,7 @@ export function CompetitorAnalysis() {
               </Card>
             )}
           </div>
+
         </div>
       ))}
     </div>
@@ -380,7 +393,7 @@ function SentimentStats({ result }: { result: AnalysisResult }) {
         {rows.map(([label, val, color]) => (
           <div key={label} className="stat-card">
             <div className="stat-label">{label}</div>
-            <div className="stat-value" style={{ color }}>{fmtInt(val)}</div>
+            <div className="stat-value" style={{ color }}><CountUp to={val} duration={900} /></div>
           </div>
         ))}
       </div>

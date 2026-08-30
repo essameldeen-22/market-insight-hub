@@ -5,6 +5,7 @@ import { useI18n } from "@/i18n/context";
 import { formatMoney, type Currency } from "@/lib/currency";
 import { loadRoiState, saveRoiState, type RoiState } from "@/lib/persistence.functions";
 import { Card, exportElementToPdf, exportToCsv, fmtPct, useDebouncedEffect } from "./shared";
+import { AnimatedValue } from "./Animated";
 
 export function RoiCalculator({ currency }: { currency: Currency }) {
   const { t } = useI18n();
@@ -153,10 +154,10 @@ export function RoiCalculator({ currency }: { currency: Currency }) {
         <div className="right-col">
           <Card title={<><span className="icon-lead">📊</span> {t("panels.roi.results_title")}</>}>
             <div className="roi-grid">
-              <div className="roi-result"><div className="num" style={{ color: "var(--danger)" }}>{formatMoney(totalCost, currency)}</div><div className="lbl">{t("panels.roi.total_cost")}</div></div>
-              <div className="roi-result"><div className="num" style={{ color: "var(--success)" }}>{formatMoney(totalGain, currency)}</div><div className="lbl">{t("panels.roi.total_gain")}</div></div>
-              <div className="roi-result"><div className="num" style={{ color: net >= 0 ? "var(--success)" : "var(--danger)" }}>{formatMoney(net, currency)}</div><div className="lbl">{t("panels.roi.net")}</div></div>
-              <div className="roi-result"><div className="num">{fmtPct(roiPct, 1)}%</div><div className="lbl">{t("panels.roi.percent")}</div></div>
+              <div className="roi-result"><div className="num" style={{ color: "var(--danger)" }}><AnimatedValue value={totalCost} format={(n) => formatMoney(n, currency)} /></div><div className="lbl">{t("panels.roi.total_cost")}</div></div>
+              <div className="roi-result"><div className="num" style={{ color: "var(--success)" }}><AnimatedValue value={totalGain} format={(n) => formatMoney(n, currency)} /></div><div className="lbl">{t("panels.roi.total_gain")}</div></div>
+              <div className="roi-result"><div className="num" style={{ color: net >= 0 ? "var(--success)" : "var(--danger)" }}><AnimatedValue value={net} format={(n) => formatMoney(n, currency)} /></div><div className="lbl">{t("panels.roi.net")}</div></div>
+              <div className="roi-result"><div className="num"><AnimatedValue value={roiPct} format={(n) => `${fmtPct(n, 1)}%`} /></div><div className="lbl">{t("panels.roi.percent")}</div></div>
             </div>
           </Card>
           {state.period > 0 && (

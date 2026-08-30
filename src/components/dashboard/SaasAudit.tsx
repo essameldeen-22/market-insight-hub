@@ -7,6 +7,7 @@ import { findAlternative, SAAS_CATEGORIES } from "@/lib/saas-alts";
 import { loadSaasStack, saveSaasStack, type SaasTool } from "@/lib/persistence.functions";
 import { track } from "@/lib/posthog";
 import { Card, exportElementToPdf, exportToCsv, useDebouncedEffect, fmtInt } from "./shared";
+import { AnimatedValue } from "./Animated";
 import { historyReducer } from "./history";
 import { SAAS_TEMPLATES, templateTools, type TemplateKey } from "@/lib/saas-templates";
 import { SuggestionsPanel } from "./SuggestionsPanel";
@@ -385,11 +386,11 @@ export function SaasAudit({ currency }: { currency: Currency }) {
             <div className="stats-grid">
               <div className="stat-card">
                 <div className="stat-label">{t("panels.saas.migration_cost_out")}</div>
-                <div className="stat-value" style={{ color: "var(--danger)", fontSize: "1.05rem" }}>{formatMoney(migrationCost, currency)}</div>
+                <div className="stat-value" style={{ color: "var(--danger)", fontSize: "1.05rem" }}><AnimatedValue value={migrationCost} format={(n) => formatMoney(n, currency)} /></div>
               </div>
               <div className="stat-card">
                 <div className="stat-label">{t("panels.saas.net_savings")}</div>
-                <div className="stat-value" style={{ color: netSavings > 0 ? "var(--success)" : "var(--text2)", fontSize: "1.05rem" }}>{formatMoney(netSavings, currency)}</div>
+                <div className="stat-value" style={{ color: netSavings > 0 ? "var(--success)" : "var(--text2)", fontSize: "1.05rem" }}><AnimatedValue value={netSavings} format={(n) => formatMoney(n, currency)} /></div>
               </div>
             </div>
           </Card>
