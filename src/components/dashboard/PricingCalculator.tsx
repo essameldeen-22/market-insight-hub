@@ -4,6 +4,7 @@ import { useI18n } from "@/i18n/context";
 import { formatMoney, type Currency } from "@/lib/currency";
 import { loadPricingState, savePricingState, type PricingState } from "@/lib/persistence.functions";
 import { Card, exportElementToPdf, exportToCsv, fmtPct, useDebouncedEffect } from "./shared";
+import { AnimatedValue } from "./Animated";
 
 export function PricingCalculator({ currency }: { currency: Currency }) {
   const { t } = useI18n();

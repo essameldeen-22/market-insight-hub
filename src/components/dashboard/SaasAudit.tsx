@@ -7,6 +7,7 @@ import { findAlternative, SAAS_CATEGORIES } from "@/lib/saas-alts";
 import { loadSaasStack, saveSaasStack, type SaasTool } from "@/lib/persistence.functions";
 import { track } from "@/lib/posthog";
 import { Card, exportElementToPdf, exportToCsv, useDebouncedEffect, fmtInt } from "./shared";
+import { AnimatedValue } from "./Animated";
 import { historyReducer } from "./history";
 import { SAAS_TEMPLATES, templateTools, type TemplateKey } from "@/lib/saas-templates";
 import { SuggestionsPanel } from "./SuggestionsPanel";
