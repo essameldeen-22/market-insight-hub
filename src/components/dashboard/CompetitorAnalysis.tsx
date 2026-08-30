@@ -393,7 +393,7 @@ function SentimentStats({ result }: { result: AnalysisResult }) {
         {rows.map(([label, val, color]) => (
           <div key={label} className="stat-card">
             <div className="stat-label">{label}</div>
-            <div className="stat-value" style={{ color }}>{fmtInt(val)}</div>
+            <div className="stat-value" style={{ color }}><CountUp to={val} duration={900} /></div>
           </div>
         ))}
       </div>
