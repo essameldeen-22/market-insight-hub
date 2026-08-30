@@ -4,7 +4,9 @@ import { useI18n } from "@/i18n/context";
 import { analyzeReviewsFn } from "@/lib/claude.functions";
 import type { AnalysisResult } from "@/lib/claude.server";
 import { track } from "@/lib/posthog";
+import { CountUp } from "@/components/landing/motion";
 import { Card, exportElementToPdf, exportToCsv, fmtInt, fmtPct } from "./shared";
+import { SkeletonReport } from "./Animated";
 
 interface Competitor {
   id: string;
