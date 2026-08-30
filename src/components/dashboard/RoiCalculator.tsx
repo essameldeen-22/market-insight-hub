@@ -5,6 +5,7 @@ import { useI18n } from "@/i18n/context";
 import { formatMoney, type Currency } from "@/lib/currency";
 import { loadRoiState, saveRoiState, type RoiState } from "@/lib/persistence.functions";
 import { Card, exportElementToPdf, exportToCsv, fmtPct, useDebouncedEffect } from "./shared";
+import { AnimatedValue } from "./Animated";
 
 export function RoiCalculator({ currency }: { currency: Currency }) {
   const { t } = useI18n();
