@@ -5,6 +5,7 @@ import { generateValuePropFn, listValuePropsFn, type StoredValueProp } from "@/l
 import type { ValuePropResult } from "@/lib/value-prop.server";
 import { track } from "@/lib/posthog";
 import { Card, exportElementToPdf, exportToCsv } from "./shared";
+import { SkeletonReport } from "./Animated";
 
 export function ValueProp() {
   const { t, lang } = useI18n();
