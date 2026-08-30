@@ -167,6 +167,7 @@ export type Database = {
           display_name: string | null
           has_seen_onboarding: boolean
           id: string
+          plan: string
           preferred_currency: string
           preferred_language: string
           theme: string
@@ -177,6 +178,7 @@ export type Database = {
           display_name?: string | null
           has_seen_onboarding?: boolean
           id: string
+          plan?: string
           preferred_currency?: string
           preferred_language?: string
           theme?: string
@@ -187,6 +189,7 @@ export type Database = {
           display_name?: string | null
           has_seen_onboarding?: boolean
           id?: string
+          plan?: string
           preferred_currency?: string
           preferred_language?: string
           theme?: string
