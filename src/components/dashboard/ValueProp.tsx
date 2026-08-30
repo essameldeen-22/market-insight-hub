@@ -136,8 +136,12 @@ export function ValueProp() {
         </div>
 
         <div className="right-col">
-          {result ? (
-            <>
+          {loading ? (
+            <Card>
+              <SkeletonReport lines={4} label={t("panels.vp.generating")} />
+            </Card>
+          ) : result ? (
+            <div className="result-enter">
               <Card title={<><span className="icon-lead">🚀</span> {t("panels.vp.elevator_title")}</>}>
                 <div style={{ fontSize: "1.15rem", fontWeight: 600, textAlign: "center", padding: "1rem" }}>{result.elevator}</div>
               </Card>
@@ -150,7 +154,7 @@ export function ValueProp() {
               <Card title={<><span className="icon-lead">⭐</span> {t("panels.vp.diff_title")}</>}>
                 <div style={{ fontSize: "0.95rem", lineHeight: 1.6 }}>{result.differentiator}</div>
               </Card>
-            </>
+            </div>
           ) : (
             <Card>
               <div style={{ padding: "1rem", textAlign: "center", color: "var(--text3)", fontSize: "0.85rem" }}>{t("panels.vp.empty")}</div>
