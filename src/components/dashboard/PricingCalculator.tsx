@@ -110,8 +110,8 @@ export function PricingCalculator({ currency }: { currency: Currency }) {
           {state.competitor > 0 && (
             <Card title={<><span className="icon-lead">⚖️</span> {t("panels.pricing.compare_title")}</>}>
               <div className="stats-grid">
-                <div className="stat-card"><div className="stat-label">{t("panels.pricing.your_price")}</div><div className="stat-value" style={{ color: "var(--accent)" }}>{formatMoney(optimal, currency)}</div></div>
-                <div className="stat-card"><div className="stat-label">{t("panels.pricing.comp_price")}</div><div className="stat-value">{formatMoney(state.competitor, currency)}</div></div>
+                <div className="stat-card"><div className="stat-label">{t("panels.pricing.your_price")}</div><div className="stat-value" style={{ color: "var(--accent)" }}><AnimatedValue value={optimal} format={(n) => formatMoney(n, currency)} /></div></div>
+                <div className="stat-card"><div className="stat-label">{t("panels.pricing.comp_price")}</div><div className="stat-value"><AnimatedValue value={state.competitor} format={(n) => formatMoney(n, currency)} /></div></div>
                 <div className="stat-card"><div className="stat-label">{t("panels.pricing.diff")}</div><div className={`stat-value ${diff < 0 ? "positive" : "negative"}`}>{diff > 0 ? "+" : ""}{fmtPct(diff, 1)}%</div></div>
               </div>
             </Card>
@@ -119,9 +119,9 @@ export function PricingCalculator({ currency }: { currency: Currency }) {
 
           <Card title={<><span className="icon-lead">📈</span> {t("panels.pricing.projections_title")}</>}>
             <div className="stats-grid">
-              <div className="stat-card"><div className="stat-label">{t("panels.pricing.revenue")}</div><div className="stat-value" style={{ fontSize: "1.15rem" }}>{formatMoney(revenue, currency)}</div></div>
-              <div className="stat-card"><div className="stat-label">{t("panels.pricing.profit")}</div><div className={`stat-value ${profit >= 0 ? "positive" : "negative"}`} style={{ fontSize: "1.15rem" }}>{formatMoney(profit, currency)}</div></div>
-              <div className="stat-card"><div className="stat-label">{t("panels.pricing.annual")}</div><div className="stat-value" style={{ fontSize: "1.15rem" }}>{formatMoney(annual, currency)}</div></div>
+              <div className="stat-card"><div className="stat-label">{t("panels.pricing.revenue")}</div><div className="stat-value" style={{ fontSize: "1.15rem" }}><AnimatedValue value={revenue} format={(n) => formatMoney(n, currency)} /></div></div>
+              <div className="stat-card"><div className="stat-label">{t("panels.pricing.profit")}</div><div className={`stat-value ${profit >= 0 ? "positive" : "negative"}`} style={{ fontSize: "1.15rem" }}><AnimatedValue value={profit} format={(n) => formatMoney(n, currency)} /></div></div>
+              <div className="stat-card"><div className="stat-label">{t("panels.pricing.annual")}</div><div className="stat-value" style={{ fontSize: "1.15rem" }}><AnimatedValue value={annual} format={(n) => formatMoney(n, currency)} /></div></div>
               <div className="stat-card"><div className="stat-label">{t("panels.pricing.break_even")}</div><div className="stat-value warning" style={{ fontSize: "1.15rem" }}>{breakEven}</div></div>
             </div>
           </Card>
