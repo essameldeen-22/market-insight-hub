@@ -1,7 +1,7 @@
 // Server-only helper: sentiment + topic analysis for competitor reviews.
 // Uses Google Gemini (AI Studio free tier) with native JSON output.
 
-import { GoogleGenAI } from "@google/genai";
+import { generateJson } from "./gemini.server";
 
 const MODEL = "gemini-2.5-flash";
 
