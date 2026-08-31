@@ -29,7 +29,7 @@ function CheckoutPlaceholder() {
         <p>{t("checkout.body")}</p>
         <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", marginTop: "1.5rem", flexWrap: "wrap" }}>
           <Link to="/pricing" className="nav-btn">{t("checkout.back")}</Link>
-          <Link to="/app" className="nav-btn primary">{t("nav.dashboard")}</Link>
+          <Link to="/app" className="nav-btn primary">{t("nav.app")}</Link>
         </div>
       </section>
       <SiteFooter />

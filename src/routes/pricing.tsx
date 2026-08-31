@@ -57,7 +57,7 @@ function PricingPage() {
                 <li key={f} style={{ fontSize: "0.85rem", color: "var(--text2)", padding: "0.25rem 0" }}>✓ {f}</li>
               ))}
             </ul>
-            <Link to="/auth" className="nav-btn primary" style={{ display: "inline-block", marginTop: "0.5rem" }}>{t("pricing.cta")}</Link>
+            <Link to={p.key === "free" ? "/auth" : "/checkout-placeholder"} className="nav-btn primary" style={{ display: "inline-block", marginTop: "0.5rem" }}>{p.key === "free" ? t("pricing.cta") : t("pricing.upgrade")}</Link>
           </div>
         ))}
       </div>
