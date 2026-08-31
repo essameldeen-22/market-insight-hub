@@ -6,7 +6,7 @@ export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
       { title: "Privacy Policy — Market Intelligence Suite" },
-      { name: "description", content: "What data we collect, how we use it, and who we share it with — including our use of Anthropic Claude for AI analysis." },
+      { name: "description", content: "What data we collect, how we use it, and who we share it with — including our use of Google Gemini for AI analysis." },
       { property: "og:title", content: "Privacy Policy" },
       { property: "og:description", content: "What we collect, how long we keep it, and your rights." },
       { property: "og:type", content: "website" },
@@ -41,7 +41,7 @@ function PrivacyPage() {
             <h3>معالجات من طرف ثالث</h3>
             <ul>
               <li><strong>Supabase:</strong> استضافة قاعدة البيانات والمصادقة.</li>
-              <li><strong>Anthropic Claude:</strong> نصوص المراجعات التي تُدخلها تُرسَل إلى Anthropic لتحليل المشاعر والمواضيع. لا تُستخدم لتدريب النماذج (بموجب سياسة Anthropic التجارية).</li>
+              <li><strong>Google Gemini:</strong> نصوص المراجعات التي تُدخلها تُرسَل إلى Google لتحليل المشاعر والمواضيع. نستخدم حالياً الطبقة المجانية من Gemini API، وقد تستخدم Google هذه البيانات لتحسين خدماتها؛ لذا لا تُدخل بيانات سرية.</li>
               <li><strong>Stripe:</strong> عند الاشتراك في Pro، تُعالج بيانات الدفع بواسطة Stripe مباشرة — لا نرى أرقام البطاقات.</li>
               <li><strong>Frankfurter API:</strong> لجلب أسعار صرف العملات (طلب مجهول من متصفحك).</li>
               <li><strong>Google OAuth:</strong> اختياري لتسجيل الدخول.</li>
@@ -72,7 +72,7 @@ function PrivacyPage() {
             <h3>Third-party processors</h3>
             <ul>
               <li><strong>Supabase:</strong> database and authentication hosting.</li>
-              <li><strong>Anthropic Claude:</strong> review text you submit is sent to Anthropic for sentiment and topic analysis. It is <em>not</em> used to train models (under Anthropic&apos;s commercial policy).</li>
+              <li><strong>Google Gemini:</strong> review text you submit is sent to Google for sentiment and topic analysis. We currently use the free Gemini API tier, where Google may use submitted data to improve its services &mdash; so do not submit confidential text.</li>
               <li><strong>Stripe:</strong> when you subscribe to Pro, payment details are handled by Stripe directly — we never see card numbers.</li>
               <li><strong>Frankfurter API:</strong> anonymous request from your browser to fetch currency exchange rates.</li>
               <li><strong>Google OAuth:</strong> optional sign-in provider.</li>

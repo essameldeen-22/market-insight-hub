@@ -1,5 +1,7 @@
-// Server-only: Claude-powered value proposition generator.
-import Anthropic from "@anthropic-ai/sdk";
+// Server-only: Gemini-powered value proposition generator (AI Studio free tier).
+import { generateJson } from "./gemini.server";
+
+const MODEL = "gemini-2.5-flash";
 
 export interface ValuePropResult {
   outcome: string;
@@ -37,25 +39,11 @@ export async function generateValueProp(input: {
   differentiator: string;
   lang: "ar" | "en";
 }): Promise<ValuePropResult> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) throw new Error("ANTHROPIC_API_KEY is not configured");
-  const client = new Anthropic({ apiKey });
   const system = input.lang === "ar" ? SYSTEM_PROMPT_AR : SYSTEM_PROMPT_EN;
   const user =
     input.lang === "ar"
       ? `المنتج: ${input.product}\nالجمهور المستهدف: ${input.target}\nنقاط الألم: ${input.pains}\nالتمييز الرئيسي: ${input.differentiator}`
       : `Product: ${input.product}\nTarget customer: ${input.target}\nTop pains: ${input.pains}\nKey differentiator: ${input.differentiator}`;
 
-  const response = await client.messages.create({
-    model: "claude-haiku-4-5",
-    max_tokens: 800,
-    system,
-    messages: [{ role: "user", content: user }],
-  });
-  const text = response.content
-    .map((b) => (b.type === "text" ? b.text : ""))
-    .join("")
-    .trim();
-  const cleaned = text.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
-  return JSON.parse(cleaned) as ValuePropResult;
+  return generateJson<ValuePropResult>({ system, user, model: MODEL, maxOutputTokens: 2048 });
 }

@@ -40,7 +40,7 @@ function TermsPage() {
             <p>ممنوع: (أ) إدخال بيانات مسروقة أو منتهكة لحقوق الملكية الفكرية أو محتوى غير قانوني، (ب) محاولة اختراق أو إساءة استخدام البنية التحتية، (ج) استخدام تلقائي لكشط بيانات مراجعات من طرف ثالث بشكل ينتهك شروطهم (Amazon, Google, Trustpilot, …). أنت مسؤول قانونياً عن مصدر أي مراجعات تلصقها في الأداة.</p>
 
             <h3>٤. تحليل الذكاء الاصطناعي</h3>
-            <p>تُرسَل نصوص المراجعات إلى Anthropic Claude لتحليل المشاعر والمواضيع. النتائج تقديرية وليست نصيحة قانونية أو مالية أو استثمارية. أنت مسؤول عن التحقق قبل اتخاذ قرارات تجارية بناءً عليها.</p>
+            <p>تُرسَل نصوص المراجعات إلى Google Gemini لتحليل المشاعر والمواضيع. النتائج تقديرية وليست نصيحة قانونية أو مالية أو استثمارية. أنت مسؤول عن التحقق قبل اتخاذ قرارات تجارية بناءً عليها.</p>
 
             <h3>٥. الاشتراكات المدفوعة</h3>
             <p>الفوترة الفعلية لخطة Pro لم تُفعَّل بعد؛ وحال تفعيلها ستتم عبر مزود دفع خارجي معتمد. يمكنك الإلغاء في أي وقت وستستمر خدمتك حتى نهاية دورة الفوترة الحالية. لا استرداد لأشهر مضت. الأسعار قابلة للتغيير بإشعار مسبق ٣٠ يوماً.</p>
@@ -69,7 +69,7 @@ function TermsPage() {
             <p>You will not: (a) submit stolen, IP-infringing, or unlawful content; (b) probe, attack, or abuse our infrastructure; (c) use the tool to automate scraping of third-party review sources (Amazon, Google, Trustpilot, etc.) in violation of their terms. You are legally responsible for the source of any review text you paste into the tool.</p>
 
             <h3>4. AI Analysis</h3>
-            <p>Review text you submit is sent to Anthropic Claude for sentiment and topic analysis. Results are directional, not legal, financial, or investment advice. You are responsible for verifying findings before making business decisions.</p>
+            <p>Review text you submit is sent to Google Gemini for sentiment and topic analysis. Results are directional, not legal, financial, or investment advice. You are responsible for verifying findings before making business decisions.</p>
 
             <h3>5. Paid Subscriptions</h3>
             <p>Pro plan billing is not active yet; when enabled, it will be processed through a third-party payment provider. You can cancel any time and your service continues until the end of the current billing period. No refunds for past periods. Prices may change with 30 days&apos; notice.</p>
