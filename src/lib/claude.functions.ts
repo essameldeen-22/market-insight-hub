@@ -48,7 +48,7 @@ export const analyzeReviewsFn = createServerFn({ method: "POST" })
 
     // 2. Rate limit gate — cache hits don't cost anything, but a real call does.
     const usage = await currentUsage(context.supabase, uid);
-    if (isRateLimited(usage.count, DAILY_FREE_LIMIT)) {
+    if (isRateLimited(usage.count, usage.limit)) {
       throw new Error("RATE_LIMIT_DAILY");
     }
 
@@ -71,33 +71,16 @@ export const analyzeReviewsFn = createServerFn({ method: "POST" })
     }
 
     // 5. Bump usage counter.
-    const bumped = nextUsage(usage.count);
-    await context.supabase
-      .from("analysis_usage")
-      .upsert(
-        { user_id: uid, ...bumped, updated_at: new Date().toISOString() },
-        { onConflict: "user_id,day" },
-      );
+    await bumpUsage(context.supabase, uid, usage.count);
 
     return {
       result,
       previous,
       cached: false,
-      usage: { count: usage.count + 1, limit: DAILY_FREE_LIMIT },
+      usage: { count: usage.count + 1, limit: usage.limit, plan: usage.plan },
     };
   });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function currentUsage(supabase: any, uid: string) {
-  const today = dayKey();
-  const { data } = await supabase
-    .from("analysis_usage")
-    .select("count, day")
-    .eq("user_id", uid)
-    .eq("day", today)
-    .maybeSingle();
-  return { count: usageForToday(data, today), limit: DAILY_FREE_LIMIT };
-}
 
 async function loadPrevious(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
