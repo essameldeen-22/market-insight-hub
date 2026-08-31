@@ -2,6 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { ValuePropResult } from "./value-prop.server";
+import { isRateLimited } from "./rate-limit";
+import { bumpUsage, currentUsage } from "./usage";
 
 const GenInput = z.object({
   product: z.string().min(1).max(200),
@@ -15,8 +17,17 @@ export const generateValuePropFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => GenInput.parse(input))
   .handler(async ({ data, context }) => {
+    // Same daily allowance as the competitor analyser, shared counter.
+    const usage = await currentUsage(context.supabase, context.userId);
+    if (isRateLimited(usage.count, usage.limit)) {
+      throw new Error("RATE_LIMIT_DAILY");
+    }
+
     const { generateValueProp } = await import("./value-prop.server");
     const result = await generateValueProp(data);
+
+    await bumpUsage(context.supabase, context.userId, usage.count);
+
     try {
       await context.supabase.from("value_props").insert({
         user_id: context.userId,
@@ -31,6 +42,7 @@ export const generateValuePropFn = createServerFn({ method: "POST" })
     }
     return result;
   });
+
 
 export interface StoredValueProp {
   id: string;
