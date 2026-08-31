@@ -1,5 +1,7 @@
-// Server-only: Claude-powered value proposition generator.
-import Anthropic from "@anthropic-ai/sdk";
+// Server-only: Gemini-powered value proposition generator (AI Studio free tier).
+import { generateJson } from "./gemini.server";
+
+const MODEL = "gemini-2.5-flash";
 
 export interface ValuePropResult {
   outcome: string;
