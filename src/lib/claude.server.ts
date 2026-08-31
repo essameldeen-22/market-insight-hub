@@ -55,34 +55,12 @@ CRITICAL — pains and strengths are NOT summaries; they are strategic recommend
 - Return ONLY the JSON object, no code fences.`;
 
 export async function analyzeReviews(productName: string, reviews: string[]): Promise<AnalysisResult> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) throw new Error("ANTHROPIC_API_KEY is not configured");
-
-  const client = new Anthropic({ apiKey });
-
   const userMessage = `Product: ${productName || "(unnamed)"}\n\nReviews (${reviews.length}):\n${reviews.map((r, i) => `${i + 1}. ${r}`).join("\n")}`;
 
-  const response = await client.messages.create({
-    model: "claude-haiku-4-5",
-    max_tokens: 2048,
+  return generateJson<AnalysisResult>({
     system: SYSTEM_PROMPT,
-    messages: [{ role: "user", content: userMessage }],
+    user: userMessage,
+    model: MODEL,
+    maxOutputTokens: 4096,
   });
-
-  const text = response.content
-    .map((b) => (b.type === "text" ? b.text : ""))
-    .join("")
-    .trim();
-
-  // Strip potential code fences even though we ask for none.
-  const cleaned = text.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
-
-  let parsed: AnalysisResult;
-  try {
-    parsed = JSON.parse(cleaned) as AnalysisResult;
-  } catch (e) {
-    throw new Error(`Model did not return valid JSON: ${cleaned.slice(0, 200)}`);
-  }
-
-  return parsed;
 }
