@@ -3,7 +3,8 @@ import { z } from "zod";
 import { createHash } from "crypto";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { AnalysisResult } from "./claude.server";
-import { DAILY_FREE_LIMIT, dayKey, isRateLimited, nextUsage, usageForToday } from "./rate-limit";
+import { isRateLimited } from "./rate-limit";
+import { bumpUsage, currentUsage } from "./usage";
 
 const AnalyzeInput = z.object({
   productName: z.string().max(200).default(""),
