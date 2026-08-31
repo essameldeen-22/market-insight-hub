@@ -38,7 +38,8 @@ export function ValueProp() {
       const refreshed = await list();
       setHistory(refreshed);
     } catch (e) {
-      setError(e instanceof Error ? e.message : t("panels.competitor.error"));
+      const msg = e instanceof Error ? e.message : t("panels.competitor.error");
+      setError(msg === "RATE_LIMIT_DAILY" ? t("panels.competitor.rate_limit") : msg);
     } finally {
       setLoading(false);
     }
