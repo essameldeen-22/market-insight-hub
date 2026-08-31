@@ -1,7 +1,9 @@
-// Server-only helper: Claude sentiment + topic analysis for competitor reviews.
-// Uses Anthropic Messages API with the Haiku model for cost efficiency.
+// Server-only helper: sentiment + topic analysis for competitor reviews.
+// Uses Google Gemini (AI Studio free tier) with native JSON output.
 
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenAI } from "@google/genai";
+
+const MODEL = "gemini-2.5-flash";
 
 export interface TopicResult {
   topic: string;
