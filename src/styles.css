@@ -1,49 +1,64 @@
 @import "tailwindcss" source(none);
 @source "../src";
-@import "@fontsource-variable/inter";
+@import "@fontsource-variable/archivo";
+@import "@fontsource-variable/ibm-plex-sans";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/600.css";
 @import "@fontsource/noto-sans-arabic/400.css";
 @import "@fontsource/noto-sans-arabic/600.css";
 @import "@fontsource/noto-sans-arabic/700.css";
 @import "@fontsource/noto-sans-arabic/800.css";
 
+/* Terminal Ledger: flat surfaces, hairline rules, one amber signal accent.
+   Every surface is tinted, never pure black or pure white. */
 :root {
-  --bg: #0a0a0f; --bg2: #12121a; --bg3: #16161f; --bg4: #1c1c27;
-  --border: #252532; --border2: #353545;
-  --text: #f0f0f5; --text2: #8a8a9a; --text3: #5a5a6a;
-  --accent: #6366f1; --accent2: #a855f7; --accent3: #f59e0b;
-  --success: #22c55e; --danger: #ef4444; --warning: #f59e0b; --info: #3b82f6;
-  --gradient: linear-gradient(135deg, #6366f1, #a855f7);
-  --gradient2: linear-gradient(135deg, #f59e0b, #ef4444);
-  --shadow: 0 4px 20px rgba(99,102,241,0.15);
+  --bg: #0e1113; --bg2: #14181b; --bg3: #171a1d; --bg4: #1f2327;
+  --border: #262c31; --border2: #39414a;
+  --text: #d7dde2; --text2: #9aa5ad; --text3: #7d8892;
+  --accent: #f2a63b; --accent2: #e0902a; --accent3: #4fc3d9;
+  --success: #4fb286; --danger: #e5674e; --warning: #f2a63b; --info: #4fc3d9;
+  --gradient: #f2a63b;
+  --gradient2: #4fb286;
+  --on-accent: #14181b;
+  --shadow: 0 1px 0 rgba(255,255,255,0.03), 0 10px 30px rgba(0,0,0,0.35);
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --font-head: 'Archivo Variable','Noto Sans Arabic', sans-serif;
+  --font-body: 'IBM Plex Sans Variable','Noto Sans Arabic', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 }
 .light-mode {
-  --bg: #f8fafc; --bg2: #ffffff; --bg3: #f1f5f9; --bg4: #e2e8f0;
-  --border: #e2e8f0; --border2: #cbd5e1;
-  --text: #0f172a; --text2: #64748b; --text3: #94a3b8;
-  --shadow: 0 4px 20px rgba(0,0,0,0.08);
+  --bg: #f7f5f1; --bg2: #fdfcfa; --bg3: #f2efe9; --bg4: #e8e4dc;
+  --border: #ddd8cf; --border2: #c3bdb1;
+  --text: #14171a; --text2: #55595e; --text3: #6b7076;
+  --accent: #9a5b00; --accent2: #7d4900; --accent3: #0f6c80;
+  --success: #196c4c; --danger: #a63a22; --warning: #8a5a00; --info: #0f6c80;
+  --gradient: #9a5b00;
+  --on-accent: #fdfcfa;
+  --shadow: 0 1px 0 rgba(0,0,0,0.02), 0 10px 24px rgba(20,23,26,0.08);
 }
 * { margin:0; padding:0; box-sizing:border-box; }
 body {
-  font-family: 'Inter Variable','Noto Sans Arabic', sans-serif;
+  font-family: var(--font-body);
   background: var(--bg); color: var(--text); min-height:100vh;
-  overflow-x:hidden; line-height:1.6; transition: background 0.3s, color 0.3s;
+  overflow-x:hidden; line-height:1.6; transition: background 0.25s var(--ease), color 0.25s var(--ease);
+}
+h1, h2, h3, .logo, .stat-value, .panel-header h2 {
+  font-family: var(--font-head); letter-spacing: -0.02em;
 }
 input[lang="en"], input[type="number"] { font-variant-numeric: tabular-nums; }
 input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 input[type="number"] { -moz-appearance: textfield; unicode-bidi: plaintext; }
 
+/* Static ledger grid instead of a drifting colour mesh: nothing moves behind data. */
 .bg-mesh { position:fixed; inset:0; z-index:-1; overflow:hidden; }
 .bg-mesh::before {
-  content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%;
-  background: radial-gradient(circle at 20% 50%, rgba(99,102,241,0.08) 0%, transparent 50%),
-              radial-gradient(circle at 80% 20%, rgba(168,85,247,0.06) 0%, transparent 50%);
-  animation: meshMove 20s ease-in-out infinite;
+  content:''; position:absolute; inset:0;
+  background-image: linear-gradient(to right, color-mix(in oklab, var(--border) 55%, transparent) 1px, transparent 1px),
+                    linear-gradient(to bottom, color-mix(in oklab, var(--border) 55%, transparent) 1px, transparent 1px);
+  background-size: 88px 88px;
+  mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 0%, transparent 75%);
 }
-@keyframes meshMove {
-  0%,100%{transform:translate(0,0) rotate(0deg);}
-  33%{transform:translate(2%,2%) rotate(1deg);}
-  66%{transform:translate(-1%,1%) rotate(-1deg);}
-}
+
 
 .nav {
   position:fixed; top:0; left:0; right:0; z-index:1000;
