@@ -37,7 +37,7 @@ export async function exportElementToPdf(el: HTMLElement, filename: string) {
     import("html2canvas"),
     import("jspdf"),
   ]);
-  const canvas = await html2canvas(el, { backgroundColor: "#0a0a0f", scale: 2, useCORS: true });
+  const canvas = await html2canvas(el, { backgroundColor: "#0e1113", scale: 2, useCORS: true });
   const img = canvas.toDataURL("image/png");
   const pdf = new jsPDF({ orientation: "p", unit: "pt", format: "a4" });
   const pageW = pdf.internal.pageSize.getWidth();

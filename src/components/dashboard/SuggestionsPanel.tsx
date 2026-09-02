@@ -55,7 +55,7 @@ export function SuggestionsPanel() {
   const statusLabel = (s: string) =>
     s === "approved" ? t("suggest.status_approved") : s === "rejected" ? t("suggest.status_rejected") : t("suggest.status_pending");
   const statusColor = (s: string) =>
-    s === "approved" ? "var(--success)" : s === "rejected" ? "var(--danger)" : "var(--warning, #f59e0b)";
+    s === "approved" ? "var(--success)" : s === "rejected" ? "var(--danger)" : "var(--warning)";
 
   return (
     <Card title={<><span className="icon-lead">🌱</span> {t("suggest.title")}</>}>
