@@ -111,9 +111,9 @@ input[type="number"] { -moz-appearance: textfield; unicode-bidi: plaintext; }
 .tool-card.active { border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent); }
 .tool-card.active::before { opacity:1; }
 .tool-icon {
-  width:44px; height:44px; border-radius:2px; display:flex; align-items:center; justify-content:center;
-  margin-bottom:1rem; color:var(--text); background:transparent;
-  border-inline-start:2px solid var(--accent); font-size:1.15rem; justify-content:flex-start; padding-inline-start:0.6rem;
+  width:auto; height:26px; border-radius:0; display:flex; align-items:center; justify-content:flex-start;
+  margin-bottom:0.9rem; color:var(--text); background:transparent;
+  border-inline-start:2px solid var(--accent); font-size:1.05rem; padding-inline-start:0.6rem;
 }
 .tool-icon.purple { border-inline-start-color:var(--accent); }
 .tool-icon.orange { border-inline-start-color:var(--danger); }
