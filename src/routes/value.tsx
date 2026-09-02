@@ -5,7 +5,7 @@ import { SiteNav, SiteFooter } from "@/components/SiteNav";
 export const Route = createFileRoute("/value")({
   head: () => ({
     meta: [
-      { title: "Why Market Intelligence Suite — Turn Noise Into Decisions" },
+      { title: "Why Market Intelligence Suite: Turn Noise Into Decisions" },
       { name: "description", content: "Cut SaaS spend, price with evidence, and spot product opportunities before competitors. See how the suite maps problem to solution to outcome." },
       { property: "og:title", content: "Why Market Intelligence Suite" },
       { property: "og:description", content: "From messy reviews and SaaS invoices to profitable decisions." },

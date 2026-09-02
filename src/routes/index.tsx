@@ -8,10 +8,10 @@ import { Reveal, CountUp, HeroVisual } from "@/components/landing/motion";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Market Intelligence Suite — Competitor Analysis, SaaS Audit, Pricing & ROI" },
+      { title: "Market Intelligence Suite: Competitor Analysis, SaaS Audit, Pricing & ROI" },
       { name: "description", content: "Analyze competitor reviews with AI, audit your SaaS stack, calculate optimal pricing and ROI. Arabic & English, multi-currency." },
       { property: "og:title", content: "Market Intelligence Suite" },
-      { property: "og:description", content: "AI-powered competitor analysis, SaaS cost optimization, pricing & ROI calculators — Arabic & English." },
+      { property: "og:description", content: "AI-powered competitor analysis, SaaS cost optimization, pricing & ROI calculators: Arabic & English." },
       { property: "og:type", content: "website" },
     ],
   }),

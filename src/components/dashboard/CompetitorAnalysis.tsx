@@ -201,7 +201,7 @@ export function CompetitorAnalysis() {
             <Card
               title={
                 <>
-                  <span className="icon-lead">✏️</span> {t("panels.competitor.input_title")} — {t("panels.competitor.product_n")} {idx + 1}
+                  <span className="icon-lead">✏️</span> {t("panels.competitor.input_title")}: {t("panels.competitor.product_n")} {idx + 1}
                 </>
               }
               right={
@@ -272,7 +272,7 @@ export function CompetitorAnalysis() {
                   <TopicsList topics={p.result.topics} />
                 </Card>
                 <Card title={<><span className="icon-lead">⚠️</span> {t("panels.competitor.pains_title")}</>}>
-                  {p.result.pains.length === 0 && <div className="pain-desc">—</div>}
+                  {p.result.pains.length === 0 && <div className="pain-desc">-</div>}
                   {p.result.pains.map((pain, i) => (
                     <div key={i} className="pain-card">
                       <div className="pain-title">🔴 {pain.title}</div>
@@ -281,7 +281,7 @@ export function CompetitorAnalysis() {
                   ))}
                 </Card>
                 <Card title={<><span className="icon-lead">✅</span> {t("panels.competitor.strengths_title")}</>}>
-                  {p.result.strengths.length === 0 && <div className="pain-desc">—</div>}
+                  {p.result.strengths.length === 0 && <div className="pain-desc">-</div>}
                   {p.result.strengths.map((s, i) => (
                     <div key={i} className="pain-card positive">
                       <div className="pain-title">🟢 {s.title}</div>

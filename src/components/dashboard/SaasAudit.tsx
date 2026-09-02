@@ -197,7 +197,7 @@ export function SaasAudit({ currency }: { currency: Currency }) {
       annual += yearly;
       const alt = lookupAlt(t.name);
       if (alt) { migratable += 1; savings += yearly * alt.save; }
-      if (yearly > topCost.value) topCost = { name: t.name || "—", value: yearly };
+      if (yearly > topCost.value) topCost = { name: t.name || "-", value: yearly };
       if ((t.usage ?? 100) < lowUse.pct && t.name) lowUse = { name: t.name, pct: t.usage ?? 0 };
       waste += yearly * (1 - (t.usage ?? 100) / 100);
     }

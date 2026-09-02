@@ -1,4 +1,4 @@
-// Plan-based daily AI limits. Pure logic — no Supabase imports, easy to test.
+// Plan-based daily AI limits. Pure logic: no Supabase imports, easy to test.
 import { DAILY_FREE_LIMIT } from "./rate-limit";
 
 export type Plan = "free" | "pro" | "team";

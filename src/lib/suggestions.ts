@@ -39,7 +39,7 @@ export class SuggestionReviewError extends Error {}
 
 /**
  * Compute the result of an admin review. Throws when the suggestion has
- * already been reviewed — reviews are one-way and not repeatable.
+ * already been reviewed: reviews are one-way and not repeatable.
  */
 export function reviewTransition(
   suggestion: Pick<Suggestion, "status" | "from_tool" | "to_tool" | "save_pct" | "difficulty" | "category" | "notes">,

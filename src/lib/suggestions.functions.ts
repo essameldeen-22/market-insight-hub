@@ -12,7 +12,7 @@ const SuggestionInput = z.object({
   notes: z.string().max(500).optional().nullable(),
 });
 
-/** Anyone signed in can propose an alternative — it lands in the review queue. */
+/** Anyone signed in can propose an alternative: it lands in the review queue. */
 export const submitSuggestion = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => SuggestionInput.parse(input))

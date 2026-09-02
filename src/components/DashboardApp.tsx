@@ -118,7 +118,7 @@ export function DashboardApp() {
   const rates = useRates();
   const ratesTs = rates.updatedAt
     ? new Date(rates.updatedAt).toLocaleDateString(lang === "ar" ? "ar-EG-u-nu-latn" : "en-US", { month: "short", day: "numeric", year: "numeric" })
-    : "—";
+    : "-";
   const ratesTitle = rates.loading ? t("rates.loading") : rates.source === "fallback" ? t("rates.fallback") : t("rates.updated", { ts: ratesTs });
 
   const extras = (

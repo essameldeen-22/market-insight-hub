@@ -1,4 +1,4 @@
-// PostHog analytics — no-op safely when VITE_POSTHOG_KEY is not configured.
+// PostHog analytics: no-op safely when VITE_POSTHOG_KEY is not configured.
 // The user is expected to add VITE_POSTHOG_KEY (and optionally
 // VITE_POSTHOG_HOST) as a workspace build secret; without it we still render.
 import { useEffect, type ReactNode } from "react";

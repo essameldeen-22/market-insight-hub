@@ -1,5 +1,5 @@
 // Server-only: shared Google Gemini (AI Studio free tier) JSON call.
-// Free tier only — no Google Cloud Billing involved.
+// Free tier only: no Google Cloud Billing involved.
 import { GoogleGenAI, type GenerateContentResponse } from "@google/genai";
 
 /** Concatenates every text part across Gemini's candidate/parts response shape. */
