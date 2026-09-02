@@ -5,9 +5,9 @@ import { SiteNav, SiteFooter } from "@/components/SiteNav";
 export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
-      { title: "Pricing: Market Intelligence Suite" },
+      { title: "Pricing | Market Intelligence Suite" },
       { name: "description", content: "Simple, transparent plans. Start free with every module. Upgrade for multi-product analysis, priority support, and team seats." },
-      { property: "og:title", content: "Pricing: Market Intelligence Suite" },
+      { property: "og:title", content: "Pricing | Market Intelligence Suite" },
       { property: "og:description", content: "Free, Pro, and Team plans for competitor analysis, SaaS audit, pricing and ROI." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "/pricing" },

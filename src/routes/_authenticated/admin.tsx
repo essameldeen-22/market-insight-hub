@@ -10,7 +10,7 @@ import { Card, fmtInt } from "@/components/dashboard/shared";
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
     meta: [
-      { title: "Suggestion review: Market Intelligence Suite" },
+      { title: "Suggestion review | Market Intelligence Suite" },
       { name: "description", content: "Admin review queue for community-submitted SaaS alternatives." },
       { name: "robots", content: "noindex" },
     ],

@@ -5,7 +5,7 @@ import { SiteNav, SiteFooter } from "@/components/SiteNav";
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "Privacy Policy: Market Intelligence Suite" },
+      { title: "Privacy Policy | Market Intelligence Suite" },
       { name: "description", content: "What data we collect, how we use it, and who we share it with: including our use of Google Gemini for AI analysis." },
       { property: "og:title", content: "Privacy Policy" },
       { property: "og:description", content: "What we collect, how long we keep it, and your rights." },

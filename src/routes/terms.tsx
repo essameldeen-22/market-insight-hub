@@ -5,7 +5,7 @@ import { SiteNav, SiteFooter } from "@/components/SiteNav";
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
-      { title: "Terms of Service: Market Intelligence Suite" },
+      { title: "Terms of Service | Market Intelligence Suite" },
       { name: "description", content: "Terms governing the use of Market Intelligence Suite: account, acceptable use, AI-generated analysis, and cancellation." },
       { property: "og:title", content: "Terms of Service" },
       { property: "og:description", content: "Read the terms that govern using Market Intelligence Suite." },
