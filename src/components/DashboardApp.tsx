@@ -141,10 +141,12 @@ export function DashboardApp() {
       <div className="bg-mesh" />
       <SiteNav extras={extras} />
 
+      <div className={firstRun ? "first-run" : undefined}>
       <section className="hero" style={{ paddingBottom: "1.5rem" }}>
         <div className="badge"><span className="badge-dot" />{t("hero.badge")}</div>
         <h1><span>{t("hero.title.a")}</span> {t("hero.title.b")}</h1>
       </section>
+
 
       <div className="tools-grid" id="tour-tools">
         {cards.map((c) => (
