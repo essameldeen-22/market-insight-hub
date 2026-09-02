@@ -5,7 +5,7 @@ import { SiteNav, SiteFooter } from "@/components/SiteNav";
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
-      { title: "Terms of Service: Market Intelligence Suite" },
+      { title: "Terms of Service | Market Intelligence Suite" },
       { name: "description", content: "Terms governing the use of Market Intelligence Suite: account, acceptable use, AI-generated analysis, and cancellation." },
       { property: "og:title", content: "Terms of Service" },
       { property: "og:description", content: "Read the terms that govern using Market Intelligence Suite." },
@@ -52,7 +52,7 @@ function TermsPage() {
             <p>تُقدَّم الخدمة &quot;كما هي&quot;. لا ضمان لدقة التحليلات أو استمرارية الخدمة بلا انقطاع. الحد الأقصى لمسؤوليتنا التراكمية = ما دفعته لنا في آخر ١٢ شهراً.</p>
 
             <h3>٨. الإنهاء</h3>
-            <p>يحق لك حذف حسابك في أي وقت من إعدادات لوحة التحكم: وسيتم حذف جميع بياناتك نهائياً. يحق لنا تعليق حسابات تنتهك هذه الشروط.</p>
+            <p>يحق لك حذف حسابك في أي وقت من إعدادات لوحة التحكم، وسيتم حذف جميع بياناتك نهائياً. يحق لنا تعليق حسابات تنتهك هذه الشروط.</p>
 
             <h3>٩. القانون الحاكم</h3>
             <p>لم تُسجَّل الخدمة بعد ككيان قانوني رسمي. سيُحدَّد القانون الحاكم والاختصاص القضائي صراحةً في هذه الصفحة فور إتمام تسجيل الخدمة رسمياً من قِبل مالكها/مشغّلها، وسنخطر المستخدمين بذلك. حتى ذلك الحين تُحل النزاعات ودياً عبر التواصل المباشر.</p>
@@ -81,7 +81,7 @@ function TermsPage() {
             <p>The Service is provided &quot;as is&quot;. We don&apos;t warrant analysis accuracy or uninterrupted availability. Our maximum cumulative liability equals what you paid us in the last 12 months.</p>
 
             <h3>8. Termination</h3>
-            <p>You can delete your account at any time from the dashboard settings: all your data is permanently removed. We may suspend accounts that violate these Terms.</p>
+            <p>You can delete your account at any time from the dashboard settings, and all your data is permanently removed. We may suspend accounts that violate these Terms.</p>
 
             <h3>9. Governing Law</h3>
             <p>The Service is not yet incorporated as a formal legal entity. The governing law and jurisdiction will be specified explicitly on this page once the Service is formally registered by its owner/operator, and users will be notified of the change. Until then, disputes are resolved amicably through direct contact.</p>

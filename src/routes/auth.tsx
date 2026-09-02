@@ -7,7 +7,7 @@ import { useI18n } from "@/i18n/context";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in: Market Intelligence Suite" },
+      { title: "Sign in | Market Intelligence Suite" },
       { name: "description", content: "Sign in to your Market Intelligence Suite dashboard." },
     ],
   }),

@@ -7,9 +7,9 @@ import { SiteNav, SiteFooter } from "@/components/SiteNav";
 export const Route = createFileRoute("/checkout-placeholder")({
   head: () => ({
     meta: [
-      { title: "Checkout: Market Intelligence Suite" },
+      { title: "Checkout | Market Intelligence Suite" },
       { name: "description", content: "Upgrade checkout for Market Intelligence Suite is not live yet. Every module stays available on the free plan meanwhile." },
-      { property: "og:title", content: "Checkout: Market Intelligence Suite" },
+      { property: "og:title", content: "Checkout | Market Intelligence Suite" },
       { property: "og:description", content: "Paid plans are coming soon. Keep using the free plan for competitor analysis, SaaS audit, pricing and ROI." },
       { property: "og:type", content: "website" },
     ],
