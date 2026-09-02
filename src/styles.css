@@ -233,7 +233,7 @@ select.input-field { cursor:pointer; }
 .mig-badge.hard { background:color-mix(in oklab, var(--danger) 16%, transparent); color:var(--danger); border:1px solid var(--danger); }
 
 .sentiment-bar { display:flex; height:28px; border-radius:6px; overflow:hidden; margin-top:0.5rem; }
-.sentiment-segment { display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-weight:700; color:white; transition:border-color 0.2s var(--ease), background 0.2s var(--ease); }
+.sentiment-segment { display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:0.7rem; font-weight:600; color:var(--on-accent); transition:border-color 0.2s var(--ease), background 0.2s var(--ease); }
 
 .topic-item { display:flex; align-items:center; gap:0.75rem; padding:0.75rem; background:var(--bg2); border-radius:8px; margin-bottom:0.5rem; border:1px solid var(--border); }
 .topic-rank { width:26px; height:26px; display:flex; align-items:center; justify-content:center; background:var(--bg4); border:1px solid var(--border2); border-radius:3px; font-family:var(--font-mono); font-size:0.72rem; color:var(--accent); flex-shrink:0; }
@@ -346,19 +346,19 @@ input[type="range"],
 .hv-orb { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.5; }
 .hv-orb-1 {
   width: 420px; height: 420px; top: 4%; left: 12%;
-  background: radial-gradient(circle, rgba(99,102,241,0.55), transparent 70%);
+  background: radial-gradient(circle, rgba(242,166,59,0.40), transparent 70%);
   transform: translate3d(calc(var(--px) * 22px), calc(var(--py) * 18px - var(--scroll) * 40px), 0);
   animation: hvDrift 22s ease-in-out infinite;
 }
 .hv-orb-2 {
   width: 340px; height: 340px; top: 22%; right: 10%;
-  background: radial-gradient(circle, rgba(168,85,247,0.45), transparent 70%);
+  background: radial-gradient(circle, rgba(79,195,217,0.28), transparent 70%);
   transform: translate3d(calc(var(--px) * -26px), calc(var(--py) * -14px - var(--scroll) * 60px), 0);
   animation: hvDrift 28s ease-in-out infinite reverse;
 }
 .hv-orb-3 {
   width: 260px; height: 260px; bottom: -8%; left: 46%;
-  background: radial-gradient(circle, rgba(245,158,11,0.22), transparent 70%);
+  background: radial-gradient(circle, rgba(79,178,134,0.20), transparent 70%);
   transform: translate3d(calc(var(--px) * 14px), calc(var(--py) * 12px), 0);
   animation: hvDrift 34s ease-in-out infinite;
 }

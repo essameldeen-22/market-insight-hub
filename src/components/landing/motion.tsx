@@ -152,8 +152,8 @@ export function HeroVisual() {
       <svg className="hv-ring" viewBox="0 0 400 400" focusable="false">
         <defs>
           <linearGradient id="hvGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#6366f1" stopOpacity="0.55" />
-            <stop offset="100%" stopColor="#a855f7" stopOpacity="0.15" />
+            <stop offset="0%" stopColor="#f2a63b" stopOpacity="0.5" />
+            <stop offset="100%" stopColor="#4fc3d9" stopOpacity="0.12" />
           </linearGradient>
         </defs>
         <circle cx="200" cy="200" r="150" fill="none" stroke="url(#hvGrad)" strokeWidth="1" />
