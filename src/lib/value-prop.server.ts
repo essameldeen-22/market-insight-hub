@@ -10,7 +10,7 @@ export interface ValuePropResult {
   elevator: string;
 }
 
-const SYSTEM_PROMPT_EN = `You are a senior positioning strategist. Given a product, target customer, key pains, and differentiator, produce EXACTLY this strict JSON — no markdown, no commentary:
+const SYSTEM_PROMPT_EN = `You are a senior positioning strategist. Given a product, target customer, key pains, and differentiator, produce EXACTLY this strict JSON: no markdown, no commentary:
 
 {
   "outcome": "one outcome-focused value proposition sentence (what the customer achieves)",
@@ -21,7 +21,7 @@ const SYSTEM_PROMPT_EN = `You are a senior positioning strategist. Given a produ
 
 Rules: concrete, no jargon, no hype adjectives ("revolutionary", "world-class"). Each statement must be usable as-is on a landing hero. Return ONLY the JSON.`;
 
-const SYSTEM_PROMPT_AR = `أنت خبير تموضع منتجات. من اسم المنتج، وصف الجمهور، أهم نقاط الألم، والتمييز، أنتِج JSON صارم فقط بالتنسيق التالي — بدون Markdown ولا شرح:
+const SYSTEM_PROMPT_AR = `أنت خبير تموضع منتجات. من اسم المنتج، وصف الجمهور، أهم نقاط الألم، والتمييز، أنتِج JSON صارم فقط بالتنسيق التالي: بدون Markdown ولا شرح:
 
 {
   "outcome": "عبارة قيمة مركّزة على النتيجة (ماذا سيحقق العميل)",

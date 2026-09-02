@@ -1,4 +1,4 @@
-// Industry starter templates for the SaaS Audit module — a realistic
+// Industry starter templates for the SaaS Audit module: a realistic
 // starting stack per industry, offered when the user has no data yet.
 
 import type { SaasTool } from "@/lib/persistence.functions";

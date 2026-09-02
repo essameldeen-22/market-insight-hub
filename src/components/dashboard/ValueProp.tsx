@@ -129,7 +129,7 @@ export function ValueProp() {
                   <div className="pain-title">{h.product}</div>
                   <div className="pain-desc" style={{ fontSize: "0.75rem" }}>
                     {new Date(h.created_at).toLocaleDateString(lang === "ar" ? "ar-EG-u-nu-latn" : "en-US")}
-                    {h.result?.elevator && ` — ${h.result.elevator}`}
+                    {h.result?.elevator && `: ${h.result.elevator}`}
                   </div>
                 </div>
               ))}

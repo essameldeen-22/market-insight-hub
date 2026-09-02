@@ -26,7 +26,7 @@ export const analyzeReviewsFn = createServerFn({ method: "POST" })
     const uid = context.userId;
     const hash = hashReviews(data.productName, data.reviews);
 
-    // 1. Cache lookup — identical (user, product, reviews) → skip Claude.
+    // 1. Cache lookup: identical (user, product, reviews) → skip Claude.
     const { data: cached } = await context.supabase
       .from("competitor_analyses")
       .select("result, created_at")
@@ -46,7 +46,7 @@ export const analyzeReviewsFn = createServerFn({ method: "POST" })
       };
     }
 
-    // 2. Rate limit gate — cache hits don't cost anything, but a real call does.
+    // 2. Rate limit gate: cache hits don't cost anything, but a real call does.
     const usage = await currentUsage(context.supabase, uid);
     if (isRateLimited(usage.count, usage.limit)) {
       throw new Error("RATE_LIMIT_DAILY");

@@ -197,7 +197,7 @@ export function SaasAudit({ currency }: { currency: Currency }) {
       annual += yearly;
       const alt = lookupAlt(t.name);
       if (alt) { migratable += 1; savings += yearly * alt.save; }
-      if (yearly > topCost.value) topCost = { name: t.name || "—", value: yearly };
+      if (yearly > topCost.value) topCost = { name: t.name || "-", value: yearly };
       if ((t.usage ?? 100) < lowUse.pct && t.name) lowUse = { name: t.name, pct: t.usage ?? 0 };
       waste += yearly * (1 - (t.usage ?? 100) / 100);
     }
@@ -228,7 +228,7 @@ export function SaasAudit({ currency }: { currency: Currency }) {
       labels: Array.from(map.keys()),
       datasets: [{
         data: Array.from(map.values()),
-        backgroundColor: ["#6366f1", "#a855f7", "#f59e0b", "#22c55e", "#3b82f6", "#ef4444", "#06b6d4", "#84cc16", "#ec4899", "#8b5cf6"],
+        backgroundColor: ["#f2a63b", "#4fc3d9", "#4fb286", "#e5674e", "#c98a4b", "#7f9aa6", "#d9c26a", "#5f8f7a", "#b0674f", "#8f9bb3"],
         borderWidth: 0,
       }],
     };
@@ -416,7 +416,7 @@ export function SaasAudit({ currency }: { currency: Currency }) {
           {catData.labels.length > 0 && (
             <Card title={<><span className="icon-lead">📊</span> {t("panels.saas.chart_title")}</>}>
               <div className="chart-container" style={{ height: 220 }}>
-                <Doughnut data={catData} options={{ maintainAspectRatio: false, plugins: { legend: { position: "bottom", labels: { color: "#a1a1aa", font: { size: 10 } } } } }} />
+                <Doughnut data={catData} options={{ maintainAspectRatio: false, plugins: { legend: { position: "bottom", labels: { color: "#9aa5ad", font: { size: 10 } } } } }} />
               </div>
             </Card>
           )}

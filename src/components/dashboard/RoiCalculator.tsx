@@ -57,10 +57,10 @@ export function RoiCalculator({ currency }: { currency: Currency }) {
     return {
       labels,
       datasets: [
-        { label: t("panels.roi.chart_cost"), data: cost, borderColor: "#ef4444", backgroundColor: "rgba(239,68,68,0.1)", fill: true, tension: 0.35 },
-        { label: t("panels.roi.scenario_optimistic"), data: gainOpt, borderColor: "#22c55e", backgroundColor: "rgba(34,197,94,0.1)", fill: false, tension: 0.35, borderDash: [4, 4] },
-        { label: t("panels.roi.scenario_realistic"), data: gainReal, borderColor: "#6366f1", backgroundColor: "rgba(99,102,241,0.15)", fill: false, tension: 0.35 },
-        { label: t("panels.roi.scenario_pessimistic"), data: gainPess, borderColor: "#f59e0b", backgroundColor: "rgba(245,158,11,0.1)", fill: false, tension: 0.35, borderDash: [4, 4] },
+        { label: t("panels.roi.chart_cost"), data: cost, borderColor: "#e5674e", backgroundColor: "rgba(229,103,78,0.12)", fill: true, tension: 0.35 },
+        { label: t("panels.roi.scenario_optimistic"), data: gainOpt, borderColor: "#4fb286", backgroundColor: "rgba(79,178,134,0.12)", fill: false, tension: 0.35, borderDash: [4, 4] },
+        { label: t("panels.roi.scenario_realistic"), data: gainReal, borderColor: "#f2a63b", backgroundColor: "rgba(242,166,59,0.15)", fill: false, tension: 0.35 },
+        { label: t("panels.roi.scenario_pessimistic"), data: gainPess, borderColor: "#4fc3d9", backgroundColor: "rgba(79,195,217,0.12)", fill: false, tension: 0.35, borderDash: [4, 4] },
       ],
     };
   }, [state, scenarios, t]);
@@ -163,7 +163,7 @@ export function RoiCalculator({ currency }: { currency: Currency }) {
           {state.period > 0 && (
             <Card>
               <div style={{ height: 280 }}>
-                <Line data={chartData} options={{ maintainAspectRatio: false, plugins: { legend: { labels: { color: "#a1a1aa", font: { size: 11 } } } }, scales: { x: { ticks: { color: "#71717a", font: { size: 10 } }, grid: { color: "rgba(255,255,255,0.05)" } }, y: { ticks: { color: "#71717a", font: { size: 10 } }, grid: { color: "rgba(255,255,255,0.05)" } } } }} />
+                <Line data={chartData} options={{ maintainAspectRatio: false, plugins: { legend: { labels: { color: "#9aa5ad", font: { size: 11 } } } }, scales: { x: { ticks: { color: "#9aa5ad", font: { size: 10 } }, grid: { color: "rgba(255,255,255,0.05)" } }, y: { ticks: { color: "#9aa5ad", font: { size: 10 } }, grid: { color: "rgba(255,255,255,0.05)" } } } }} />
               </div>
             </Card>
           )}

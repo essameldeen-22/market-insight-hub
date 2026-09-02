@@ -31,13 +31,13 @@ export function useDebouncedEffect(effect: () => void, deps: unknown[], delay = 
   }, [...deps, delay]);
 }
 
-// PDF export — lazy-loads jsPDF + html2canvas to keep initial bundle small.
+// PDF export: lazy-loads jsPDF + html2canvas to keep initial bundle small.
 export async function exportElementToPdf(el: HTMLElement, filename: string) {
   const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
     import("html2canvas"),
     import("jspdf"),
   ]);
-  const canvas = await html2canvas(el, { backgroundColor: "#0a0a0f", scale: 2, useCORS: true });
+  const canvas = await html2canvas(el, { backgroundColor: "#0e1113", scale: 2, useCORS: true });
   const img = canvas.toDataURL("image/png");
   const pdf = new jsPDF({ orientation: "p", unit: "pt", format: "a4" });
   const pageW = pdf.internal.pageSize.getWidth();
@@ -47,7 +47,7 @@ export async function exportElementToPdf(el: HTMLElement, filename: string) {
   pdf.save(filename);
 }
 
-// CSV export — safe against quotes, commas, newlines; Western digits guaranteed
+// CSV export: safe against quotes, commas, newlines; Western digits guaranteed
 // because inputs are already numeric or plain strings.
 export function exportToCsv(filename: string, rows: (string | number)[][]) {
   const escape = (v: string | number) => {

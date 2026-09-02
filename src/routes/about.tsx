@@ -7,10 +7,10 @@ import { SiteNav, SiteFooter } from "@/components/SiteNav";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About & Contact — Market Intelligence Suite" },
+      { title: "About & Contact: Market Intelligence Suite" },
       { name: "description", content: "Learn about the team behind Market Intelligence Suite and get in touch with questions or feedback." },
-      { property: "og:title", content: "About — Market Intelligence Suite" },
-      { property: "og:description", content: "Market decisions grounded in data — get in touch." },
+      { property: "og:title", content: "About: Market Intelligence Suite" },
+      { property: "og:description", content: "Market decisions grounded in data: get in touch." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "/about" },
     ],

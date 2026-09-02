@@ -111,9 +111,9 @@ input[type="number"] { -moz-appearance: textfield; unicode-bidi: plaintext; }
 .tool-card.active { border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent); }
 .tool-card.active::before { opacity:1; }
 .tool-icon {
-  width:44px; height:44px; border-radius:2px; display:flex; align-items:center; justify-content:center;
-  margin-bottom:1rem; color:var(--text); background:transparent;
-  border-inline-start:2px solid var(--accent); font-size:1.15rem; justify-content:flex-start; padding-inline-start:0.6rem;
+  width:auto; height:26px; border-radius:0; display:flex; align-items:center; justify-content:flex-start;
+  margin-bottom:0.9rem; color:var(--text); background:transparent;
+  border-inline-start:2px solid var(--accent); font-size:1.05rem; padding-inline-start:0.6rem;
 }
 .tool-icon.purple { border-inline-start-color:var(--accent); }
 .tool-icon.orange { border-inline-start-color:var(--danger); }
@@ -233,7 +233,7 @@ select.input-field { cursor:pointer; }
 .mig-badge.hard { background:color-mix(in oklab, var(--danger) 16%, transparent); color:var(--danger); border:1px solid var(--danger); }
 
 .sentiment-bar { display:flex; height:28px; border-radius:6px; overflow:hidden; margin-top:0.5rem; }
-.sentiment-segment { display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-weight:700; color:white; transition:border-color 0.2s var(--ease), background 0.2s var(--ease); }
+.sentiment-segment { display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:0.7rem; font-weight:600; color:var(--on-accent); transition:border-color 0.2s var(--ease), background 0.2s var(--ease); }
 
 .topic-item { display:flex; align-items:center; gap:0.75rem; padding:0.75rem; background:var(--bg2); border-radius:8px; margin-bottom:0.5rem; border:1px solid var(--border); }
 .topic-rank { width:26px; height:26px; display:flex; align-items:center; justify-content:center; background:var(--bg4); border:1px solid var(--border2); border-radius:3px; font-family:var(--font-mono); font-size:0.72rem; color:var(--accent); flex-shrink:0; }
@@ -310,7 +310,7 @@ input[type="range"],
 .tool-row input,
 .num,
 .mono-num {
-  font-family: 'Inter Variable', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-mono);
   font-feature-settings: "locl" 0;
   font-variant-numeric: lining-nums tabular-nums;
 }
@@ -346,19 +346,19 @@ input[type="range"],
 .hv-orb { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.5; }
 .hv-orb-1 {
   width: 420px; height: 420px; top: 4%; left: 12%;
-  background: radial-gradient(circle, rgba(99,102,241,0.55), transparent 70%);
+  background: radial-gradient(circle, rgba(242,166,59,0.40), transparent 70%);
   transform: translate3d(calc(var(--px) * 22px), calc(var(--py) * 18px - var(--scroll) * 40px), 0);
   animation: hvDrift 22s ease-in-out infinite;
 }
 .hv-orb-2 {
   width: 340px; height: 340px; top: 22%; right: 10%;
-  background: radial-gradient(circle, rgba(168,85,247,0.45), transparent 70%);
+  background: radial-gradient(circle, rgba(79,195,217,0.28), transparent 70%);
   transform: translate3d(calc(var(--px) * -26px), calc(var(--py) * -14px - var(--scroll) * 60px), 0);
   animation: hvDrift 28s ease-in-out infinite reverse;
 }
 .hv-orb-3 {
   width: 260px; height: 260px; bottom: -8%; left: 46%;
-  background: radial-gradient(circle, rgba(245,158,11,0.22), transparent 70%);
+  background: radial-gradient(circle, rgba(79,178,134,0.20), transparent 70%);
   transform: translate3d(calc(var(--px) * 14px), calc(var(--py) * 12px), 0);
   animation: hvDrift 34s ease-in-out infinite;
 }
@@ -433,4 +433,52 @@ input[type="range"],
 @media (prefers-reduced-motion: reduce) {
   .dash-skeleton { animation: none; }
   .result-enter { animation: none; }
+}
+
+
+/* ===== Terminal Ledger additions ===== */
+
+/* Section headings get a hairline rule + mono index instead of an icon tile. */
+.panel-header h2 { letter-spacing: -0.02em; }
+.panel-header h2 .icon-lead { color: var(--accent); font-size: 0.95em; }
+.card-title { font-family: var(--font-head); letter-spacing: -0.01em; }
+.card-title .icon-lead { color: var(--accent); }
+
+/* Numbers read as ledger figures everywhere. */
+.stat-value, .roi-result .num, .price-calc-result .big, .summary-card .value, .tool-badge {
+  font-family: var(--font-mono); font-variant-numeric: lining-nums tabular-nums;
+}
+.roi-result .num { color: var(--text); }
+.roi-result .lbl, .topic-count, .migration-item .save { font-family: var(--font-mono); font-size: 0.72rem; }
+
+/* No card inside a card: nested surfaces drop to a hairline block. */
+.card .card { background: transparent; border: 0; border-top: 1px solid var(--border); border-radius: 0; padding: 1rem 0 0; margin-bottom: 0; }
+
+/* Visible keyboard focus on every interactive element. */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible,
+textarea:focus-visible, [tabindex]:focus-visible, .tool-card:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px;
+}
+
+/* One-time post-login signature: staged entrance, then the dashboard sits still. */
+.first-run > * { animation: firstRun 0.5s var(--ease) both; }
+.first-run > *:nth-child(2) { animation-delay: 0.06s; }
+.first-run > *:nth-child(3) { animation-delay: 0.14s; }
+.first-run > *:nth-child(4) { animation-delay: 0.22s; }
+@keyframes firstRun { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+/* Small screens: 320px stays usable. */
+@media (max-width: 480px) {
+  .hero { padding: 7.5rem 1rem 2.5rem; }
+  .tools-grid, .app-panel { padding: 0 1rem; }
+  .tool-card { padding: 1.25rem; }
+  .nav { flex-wrap: wrap; gap: 0.5rem; }
+  .nav-actions { flex-wrap: wrap; gap: 0.4rem; }
+  .nav-btn { padding: 0.4rem 0.6rem; font-size: 0.78rem; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .first-run > *, .app-panel.active { animation: none !important; }
+  .topic-bar-fill { transition: none; }
 }
