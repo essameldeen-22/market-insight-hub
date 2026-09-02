@@ -42,7 +42,7 @@ function PrivacyPage() {
             <ul>
               <li><strong>Supabase:</strong> استضافة قاعدة البيانات والمصادقة.</li>
               <li><strong>Google Gemini:</strong> نصوص المراجعات التي تُدخلها تُرسَل إلى Google لتحليل المشاعر والمواضيع. نستخدم حالياً الطبقة المجانية من Gemini API، وقد تستخدم Google هذه البيانات لتحسين خدماتها؛ لذا لا تُدخل بيانات سرية.</li>
-              <li><strong>Stripe:</strong> عند الاشتراك في Pro، تُعالج بيانات الدفع بواسطة Stripe مباشرة: لا نرى أرقام البطاقات.</li>
+              <li><strong>Stripe:</strong> عند الاشتراك في Pro، تُعالج بيانات الدفع بواسطة Stripe مباشرة، ولا نرى أرقام البطاقات.</li>
               <li><strong>Frankfurter API:</strong> لجلب أسعار صرف العملات (طلب مجهول من متصفحك).</li>
               <li><strong>Google OAuth:</strong> اختياري لتسجيل الدخول.</li>
             </ul>
@@ -66,14 +66,14 @@ function PrivacyPage() {
               <li><strong>Account data:</strong> email, display name, and your language/currency/theme preferences.</li>
               <li><strong>Your tool inputs:</strong> competitor review text, SaaS tool lists, pricing and ROI calculator inputs. Stored in a Supabase database, scoped to your account via Row-Level Security.</li>
               <li><strong>Contact messages:</strong> if you use the contact form on the About page.</li>
-              <li><strong>Light server logs:</strong> technical errors only: no behavioral / marketing tracking.</li>
+              <li><strong>Light server logs:</strong> technical errors only, with no behavioral or marketing tracking.</li>
             </ul>
 
             <h3>Third-party processors</h3>
             <ul>
               <li><strong>Supabase:</strong> database and authentication hosting.</li>
               <li><strong>Google Gemini:</strong> review text you submit is sent to Google for sentiment and topic analysis. We currently use the free Gemini API tier, where Google may use submitted data to improve its services &mdash; so do not submit confidential text.</li>
-              <li><strong>Stripe:</strong> when you subscribe to Pro, payment details are handled by Stripe directly: we never see card numbers.</li>
+              <li><strong>Stripe:</strong> when you subscribe to Pro, payment details are handled by Stripe directly, and we never see card numbers.</li>
               <li><strong>Frankfurter API:</strong> anonymous request from your browser to fetch currency exchange rates.</li>
               <li><strong>Google OAuth:</strong> optional sign-in provider.</li>
             </ul>
