@@ -161,6 +161,9 @@ export function DashboardApp() {
           </div>
         ))}
       </div>
+      </div>
+
+
 
       <div className={`app-panel ${active === "competitor" ? "active" : ""}`}>{active === "competitor" && <CompetitorAnalysis />}</div>
       <div className={`app-panel ${active === "saas" ? "active" : ""}`}>{active === "saas" && <SaasAudit currency={currency} />}</div>
