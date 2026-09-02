@@ -33,6 +33,17 @@ export function DashboardApp() {
   const { t, lang, setLang } = useI18n();
   const [active, setActive] = useState<ModuleKey>("competitor");
   const [currency, setCurrency] = useState<Currency>(() => (typeof window !== "undefined" && (localStorage.getItem("mis_currency") as Currency)) || "USD");
+  // One-time signature entrance after the first sign-in, then the dashboard stays still.
+  const [firstRun, setFirstRun] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (localStorage.getItem("mis_seen_dashboard")) return;
+    localStorage.setItem("mis_seen_dashboard", "1");
+    setFirstRun(true);
+    const id = window.setTimeout(() => setFirstRun(false), 1200);
+    return () => window.clearTimeout(id);
+  }, []);
+
   const [theme, setTheme] = useState<"dark" | "light" | "auto">(() => (typeof window !== "undefined" && (localStorage.getItem("mis_theme") as "dark" | "light" | "auto")) || "dark");
 
   useEffect(() => {
@@ -156,7 +167,7 @@ export function DashboardApp() {
             <p>{c.desc}</p>
             <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap", marginTop: "0.75rem" }}>
               <span className="tool-badge">{c.badge}</span>
-              <span className="tool-badge" style={{ fontFamily: "monospace" }}>{c.shortcut}</span>
+              <span className="tool-badge" style={{ fontFamily: "var(--font-mono)" }}>{c.shortcut}</span>
             </div>
           </div>
         ))}
