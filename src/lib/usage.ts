@@ -29,3 +29,22 @@ export async function bumpUsage(supabase: any, uid: string, count: number): Prom
     .from("analysis_usage")
     .upsert({ user_id: uid, ...bumped, updated_at: new Date().toISOString() }, { onConflict: "user_id,day" });
 }
+
+// ---------------------------------------------------------------------------
+// Site-wide daily AI budget.
+// The Gemini free tier caps requests per project, not per user, so a shared
+// counter guards the whole pool. Stored in `daily_ai_usage` (service-role only)
+// and read/written with the admin client from server functions.
+
+export const DEFAULT_GLOBAL_DAILY_AI_BUDGET = 200;
+export const GLOBAL_BUDGET_THRESHOLD = 0.8;
+
+export function globalBudget(): number {
+  const raw = Number(process.env["GLOBAL_DAILY_AI_BUDGET"]);
+  return Number.isFinite(raw) && raw > 0 ? raw : DEFAULT_GLOBAL_DAILY_AI_BUDGET;
+}
+
+/** True once today's site-wide calls cross the safe threshold of the budget. */
+export function isGlobalBudgetReached(total: number, budget: number = globalBudget()): boolean {
+  return total >= budget * GLOBAL_BUDGET_THRESHOLD;
+}

@@ -5,7 +5,9 @@ export type Plan = "free" | "pro" | "team";
 
 export const PLAN_LIMITS: Record<Plan, number> = {
   free: DAILY_FREE_LIMIT, // 3
-  pro: 50,
+  // Gemini's free tier is a single project-wide daily pool, so per-user
+  // allowances stay conservative until paid capacity exists.
+  pro: 20,
   team: Number.POSITIVE_INFINITY, // unlimited
 };
 

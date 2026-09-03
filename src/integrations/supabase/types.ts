@@ -92,6 +92,24 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_ai_usage: {
+        Row: {
+          count: number
+          day: string
+          updated_at: string
+        }
+        Insert: {
+          count?: number
+          day: string
+          updated_at?: string
+        }
+        Update: {
+          count?: number
+          day?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pending_suggestions: {
         Row: {
           category: string
