@@ -52,11 +52,15 @@ export const analyzeReviewsFn = createServerFn({ method: "POST" })
       throw new Error("RATE_LIMIT_DAILY");
     }
 
-    // 3. Real analysis.
+    // 3. Shared site-wide budget gate (Gemini free tier is a project-wide pool).
+    const { assertGlobalBudget, bumpGlobalUsage } = await import("./global-budget.server");
+    const globalTotal = await assertGlobalBudget();
+
+    // 4. Real analysis.
     const { analyzeReviews } = await import("./claude.server");
     const result = await analyzeReviews(data.productName, data.reviews);
 
-    // 4. Persist + previous lookup (before insert so we don't get "self").
+    // 5. Persist + previous lookup (before insert so we don't get "self").
     const previous = await loadPrevious(context.supabase, uid, data.productName, hash);
     try {
       await context.supabase.from("competitor_analyses").insert({
@@ -70,8 +74,9 @@ export const analyzeReviewsFn = createServerFn({ method: "POST" })
       console.error("Failed to persist analysis:", e);
     }
 
-    // 5. Bump usage counter.
+    // 6. Bump usage counters.
     await bumpUsage(context.supabase, uid, usage.count);
+    await bumpGlobalUsage(globalTotal);
 
     return {
       result,

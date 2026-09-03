@@ -23,10 +23,14 @@ export const generateValuePropFn = createServerFn({ method: "POST" })
       throw new Error("RATE_LIMIT_DAILY");
     }
 
+    const { assertGlobalBudget, bumpGlobalUsage } = await import("./global-budget.server");
+    const globalTotal = await assertGlobalBudget();
+
     const { generateValueProp } = await import("./value-prop.server");
     const result = await generateValueProp(data);
 
     await bumpUsage(context.supabase, context.userId, usage.count);
+    await bumpGlobalUsage(globalTotal);
 
     try {
       await context.supabase.from("value_props").insert({
