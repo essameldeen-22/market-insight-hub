@@ -346,7 +346,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      bump_daily_ai_usage: { Args: { _day: string }; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
