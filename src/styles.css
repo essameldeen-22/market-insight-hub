@@ -469,7 +469,8 @@ textarea:focus-visible, [tabindex]:focus-visible, .tool-card:focus-visible {
 
 /* Small screens: 320px stays usable. */
 @media (max-width: 480px) {
-  .hero { padding: 7.5rem 1rem 2.5rem; }
+  .hero { padding: 10rem 1rem 2.5rem; }
+  .badge { white-space: normal; text-align: center; }
   .tools-grid, .app-panel { padding: 0 1rem; }
   .tool-card { padding: 1.25rem; }
   .nav { flex-wrap: wrap; gap: 0.5rem; }
