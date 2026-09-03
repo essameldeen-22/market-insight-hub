@@ -79,9 +79,9 @@ export function RatesProvider({ children }: { children: ReactNode }) {
         setState((s) => (s.source === "cache" ? s : { ...s, loading: false }));
         return;
       }
-      const payload: CachedRates = { rates: live, updatedAt: Date.now() };
+      const payload: CachedRates = { rates: live.rates, updatedAt: live.updatedAt };
       try { localStorage.setItem(CACHE_KEY, JSON.stringify(payload)); } catch { /* ignore */ }
-      apply(live, payload.updatedAt, "live");
+      apply(live.rates, payload.updatedAt, "live");
     });
 
     return () => { cancelled = true; };
