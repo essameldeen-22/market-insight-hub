@@ -34,6 +34,7 @@ function Landing() {
     { icon: "💼", klass: "orange", title: t("cards.saas.title"), desc: t("cards.saas.desc"), badge: t("cards.saas.badge") },
     { icon: "💰", klass: "green", title: t("cards.pricing.title"), desc: t("cards.pricing.desc"), badge: t("cards.pricing.badge") },
     { icon: "📈", klass: "blue", title: t("cards.roi.title"), desc: t("cards.roi.desc"), badge: t("cards.roi.badge") },
+    { icon: "🎯", klass: "amber", title: t("cards.vp.title"), desc: t("cards.vp.desc"), badge: t("cards.vp.badge") },
   ];
 
   const cta = () => {
