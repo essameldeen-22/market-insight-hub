@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { limitForPlan, normalizePlan } from "@/lib/plan-limits";
 import { isRateLimited } from "@/lib/rate-limit";
+import { isGlobalBudgetReached } from "@/lib/usage";
 
 describe("plan-based daily limits", () => {
   it("normalizes unknown or missing plans to free", () => {
@@ -22,5 +23,14 @@ describe("plan-based daily limits", () => {
     expect(isRateLimited(19, limitForPlan("pro"))).toBe(false);
     expect(isRateLimited(20, limitForPlan("pro"))).toBe(true);
     expect(isRateLimited(9999, limitForPlan("team"))).toBe(false);
+  });
+});
+
+describe("site-wide daily AI budget", () => {
+  it("throttles once usage crosses 80% of the budget", () => {
+    expect(isGlobalBudgetReached(0, 200)).toBe(false);
+    expect(isGlobalBudgetReached(159, 200)).toBe(false);
+    expect(isGlobalBudgetReached(160, 200)).toBe(true);
+    expect(isGlobalBudgetReached(500, 200)).toBe(true);
   });
 });
