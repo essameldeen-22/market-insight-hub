@@ -23,12 +23,12 @@ function PricingPage() {
     {
       key: "free", klass: "purple",
       name: t("pricing.free.name"), price: t("pricing.free.price"), desc: t("pricing.free.desc"),
-      features: [t("pricing.feat.analysis"), t("pricing.feat.saas"), t("pricing.feat.pricing"), t("pricing.feat.roi")],
+      features: [t("pricing.feat.analysis"), t("pricing.feat.saas"), t("pricing.feat.pricing"), t("pricing.feat.roi"), t("pricing.feat.limit_free")],
     },
     {
       key: "pro", klass: "green",
       name: t("pricing.pro.name"), price: t("pricing.pro.price"), desc: t("pricing.pro.desc"),
-      features: [t("pricing.feat.analysis"), t("pricing.feat.saas"), t("pricing.feat.pricing"), t("pricing.feat.roi"), t("pricing.feat.multi"), t("pricing.feat.export")],
+      features: [t("pricing.feat.analysis"), t("pricing.feat.saas"), t("pricing.feat.pricing"), t("pricing.feat.roi"), t("pricing.feat.limit_pro"), t("pricing.feat.multi"), t("pricing.feat.export")],
       highlight: true,
     },
     {
