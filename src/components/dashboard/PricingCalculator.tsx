@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useI18n } from "@/i18n/context";
+import { usePlan } from "@/lib/use-plan";
 import { formatMoney, type Currency } from "@/lib/currency";
 import { loadPricingState, savePricingState, type PricingState } from "@/lib/persistence.functions";
-import { Card, exportElementToPdf, exportToCsv, fmtPct, useDebouncedEffect } from "./shared";
+import { Card, exportElementToPdf, exportToCsv, fmtPct, useDebouncedEffect , UpgradeButton} from "./shared";
 import { AnimatedValue } from "./Animated";
 
 export function PricingCalculator({ currency }: { currency: Currency }) {
   const { t } = useI18n();
+  const { paid } = usePlan();
   const load = useServerFn(loadPricingState);
   const save = useServerFn(savePricingState);
   const [state, setState] = useState<PricingState>({ cost: 0, customers: 0, competitor: 0, margin: 30, model: "subscription" });
@@ -66,7 +68,11 @@ export function PricingCalculator({ currency }: { currency: Currency }) {
         <h2><span className="icon-lead">💰</span> {t("panels.pricing.h2")}</h2>
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
           <button className="btn btn-outline btn-sm" onClick={() => setState({ cost: 0, customers: 0, competitor: 0, margin: 30, model: "subscription" })}>{t("panels.pricing.reset")}</button>
-          <button className="btn btn-outline btn-sm" onClick={doExportPdf} disabled={exporting}>📄 {exporting ? "…" : t("actions.export_pdf")}</button>
+          {paid ? (
+            <button className="btn btn-outline btn-sm" onClick={doExportPdf} disabled={exporting}>📄 {exporting ? "…" : t("actions.export_pdf")}</button>
+          ) : (
+            <UpgradeButton label={t("actions.export_pdf")} title={t("plan.pdf_locked")} />
+          )}
           <button className="btn btn-outline btn-sm" onClick={doExportCsv}>📊 {t("actions.export_csv")}</button>
         </div>
       </div>

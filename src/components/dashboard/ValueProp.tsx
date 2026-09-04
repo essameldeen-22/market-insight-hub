@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useI18n } from "@/i18n/context";
+import { usePlan } from "@/lib/use-plan";
 import { generateValuePropFn, listValuePropsFn, type StoredValueProp } from "@/lib/value-prop.functions";
 import type { ValuePropResult } from "@/lib/value-prop.server";
 import { track } from "@/lib/posthog";
-import { Card, exportElementToPdf, exportToCsv } from "./shared";
+import { Card, exportElementToPdf, exportToCsv , UpgradeButton} from "./shared";
 import { SkeletonReport } from "./Animated";
 
 export function ValueProp() {
   const { t, lang } = useI18n();
+  const { paid } = usePlan();
   const generate = useServerFn(generateValuePropFn);
   const list = useServerFn(listValuePropsFn);
   const [product, setProduct] = useState("");
@@ -87,7 +89,11 @@ export function ValueProp() {
           <button className="btn btn-outline btn-sm" onClick={loadDemo}>{t("panels.competitor.demo")}</button>
           {result && (
             <>
-              <button className="btn btn-outline btn-sm" onClick={doExportPdf} disabled={exporting}>📄 {exporting ? "…" : t("actions.export_pdf")}</button>
+              {paid ? (
+                <button className="btn btn-outline btn-sm" onClick={doExportPdf} disabled={exporting}>📄 {exporting ? "…" : t("actions.export_pdf")}</button>
+              ) : (
+                <UpgradeButton label={t("actions.export_pdf")} title={t("plan.pdf_locked")} />
+              )}
               <button className="btn btn-outline btn-sm" onClick={doExportCsv}>📊 {t("actions.export_csv")}</button>
             </>
           )}

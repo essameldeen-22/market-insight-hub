@@ -2,13 +2,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Line } from "react-chartjs-2";
 import { useI18n } from "@/i18n/context";
+import { usePlan } from "@/lib/use-plan";
 import { formatMoney, type Currency } from "@/lib/currency";
 import { loadRoiState, saveRoiState, type RoiState } from "@/lib/persistence.functions";
-import { Card, exportElementToPdf, exportToCsv, fmtPct, useDebouncedEffect } from "./shared";
+import { Card, exportElementToPdf, exportToCsv, fmtPct, useDebouncedEffect , UpgradeButton} from "./shared";
 import { AnimatedValue } from "./Animated";
 
 export function RoiCalculator({ currency }: { currency: Currency }) {
   const { t } = useI18n();
+  const { paid } = usePlan();
   const load = useServerFn(loadRoiState);
   const save = useServerFn(saveRoiState);
   const [state, setState] = useState<RoiState>({ initial: 0, monthly: 0, savings: 0, revenue: 0, period: 12 });
@@ -107,7 +109,11 @@ export function RoiCalculator({ currency }: { currency: Currency }) {
         <h2><span className="icon-lead">📊</span> {t("panels.roi.h2")}</h2>
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
           <button className="btn btn-outline btn-sm" onClick={() => setState({ initial: 0, monthly: 0, savings: 0, revenue: 0, period: 12 })}>{t("panels.roi.reset")}</button>
-          <button className="btn btn-outline btn-sm" onClick={doExportPdf} disabled={exporting}>📄 {exporting ? "…" : t("actions.export_pdf")}</button>
+          {paid ? (
+            <button className="btn btn-outline btn-sm" onClick={doExportPdf} disabled={exporting}>📄 {exporting ? "…" : t("actions.export_pdf")}</button>
+          ) : (
+            <UpgradeButton label={t("actions.export_pdf")} title={t("plan.pdf_locked")} />
+          )}
           <button className="btn btn-outline btn-sm" onClick={doExportCsv}>📊 {t("actions.export_csv")}</button>
         </div>
       </div>

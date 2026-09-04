@@ -2,11 +2,12 @@ import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "r
 import { useServerFn } from "@tanstack/react-start";
 import { Doughnut } from "react-chartjs-2";
 import { useI18n } from "@/i18n/context";
+import { usePlan } from "@/lib/use-plan";
 import { formatMoney, type Currency } from "@/lib/currency";
 import { findAlternative, SAAS_CATEGORIES } from "@/lib/saas-alts";
 import { loadSaasStack, saveSaasStack, type SaasTool } from "@/lib/persistence.functions";
 import { track } from "@/lib/posthog";
-import { Card, exportElementToPdf, exportToCsv, useDebouncedEffect, fmtInt } from "./shared";
+import { Card, exportElementToPdf, exportToCsv, useDebouncedEffect, fmtInt , UpgradeButton} from "./shared";
 import { AnimatedValue } from "./Animated";
 import { historyReducer } from "./history";
 import { SAAS_TEMPLATES, templateTools, type TemplateKey } from "@/lib/saas-templates";
@@ -76,6 +77,7 @@ function parseCsvToTools(text: string): SaasTool[] {
 
 export function SaasAudit({ currency }: { currency: Currency }) {
   const { t, lang } = useI18n();
+  const { paid } = usePlan();
   const load = useServerFn(loadSaasStack);
   const save = useServerFn(saveSaasStack);
   const [state, dispatch] = useReducer(historyReducer, { past: [], present: [], future: [] });
@@ -296,7 +298,11 @@ export function SaasAudit({ currency }: { currency: Currency }) {
           </label>
           <button className="btn btn-outline btn-sm" onClick={demo}>{t("panels.saas.demo")}</button>
           <button className="btn btn-outline btn-sm" onClick={clear}>{t("panels.saas.clear")}</button>
-          <button className="btn btn-outline btn-sm" onClick={doExportPdf} disabled={exporting || tools.length === 0}>📄 {exporting ? "…" : t("actions.export_pdf")}</button>
+          {paid ? (
+            <button className="btn btn-outline btn-sm" onClick={doExportPdf} disabled={exporting || tools.length === 0}>📄 {exporting ? "…" : t("actions.export_pdf")}</button>
+          ) : (
+            <UpgradeButton label={t("actions.export_pdf")} title={t("plan.pdf_locked")} />
+          )}
           <button className="btn btn-outline btn-sm" onClick={doExportCsv} disabled={tools.length === 0}>📊 {t("actions.export_csv")}</button>
         </div>
       </div>
