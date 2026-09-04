@@ -295,7 +295,7 @@ export const TRANSLATIONS: Record<Lang, Dict> = {
     "panels.roi.scenario_realistic": "واقعي",
     "panels.roi.scenario_pessimistic": "متحفظ",
     "cards.vp.title": "مولد عبارات القيمة",
-    "cards.vp.desc": "أنتج ٣ عبارات قيمة بأساليب مختلفة + جملة مصعد واحدة.",
+    "cards.vp.desc": "أنتج 3 عبارات قيمة بأساليب مختلفة + جملة مصعد واحدة.",
     "cards.vp.badge": "AI Copy",
     "panels.vp.h2": "مولد عبارات القيمة (Value Proposition)",
     "panels.vp.inputs_title": "المدخلات",
