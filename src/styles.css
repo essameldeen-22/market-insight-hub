@@ -119,6 +119,7 @@ input[type="number"] { -moz-appearance: textfield; unicode-bidi: plaintext; }
 .tool-icon.orange { border-inline-start-color:var(--danger); }
 .tool-icon.green { border-inline-start-color:var(--success); }
 .tool-icon.blue { border-inline-start-color:var(--accent3); }
+.tool-icon.amber { border-inline-start-color:var(--accent2); }
 .tool-card h3 { font-size:1.1rem; font-weight:700; margin-bottom:0.5rem; }
 .tool-card p { font-size:0.85rem; color:var(--text2); line-height:1.5; }
 .tool-badge {
