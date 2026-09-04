@@ -41,7 +41,13 @@ export function ValueProp() {
       setHistory(refreshed);
     } catch (e) {
       const msg = e instanceof Error ? e.message : t("panels.competitor.error");
-      setError(msg === "RATE_LIMIT_DAILY" ? t("panels.competitor.rate_limit") : msg);
+      setError(
+        msg === "RATE_LIMIT_DAILY"
+          ? t("panels.competitor.rate_limit")
+          : msg === "AI_BUSY"
+            ? t("errors.ai_busy")
+            : msg,
+      );
     } finally {
       setLoading(false);
     }
