@@ -1,11 +1,12 @@
 import { useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useI18n } from "@/i18n/context";
+import { usePlan } from "@/lib/use-plan";
 import { analyzeReviewsFn } from "@/lib/claude.functions";
 import type { AnalysisResult } from "@/lib/claude.server";
 import { track } from "@/lib/posthog";
 import { CountUp } from "@/components/landing/motion";
-import { Card, exportElementToPdf, exportToCsv, fmtInt, fmtPct } from "./shared";
+import { Card, exportElementToPdf, exportToCsv, fmtInt, fmtPct, UpgradeButton } from "./shared";
 import { SkeletonReport } from "./Animated";
 
 interface Competitor {
@@ -107,6 +108,7 @@ const COMPETITOR_DEMOS: Record<"ar" | "en", { name: string; reviews: string[] }[
 export function CompetitorAnalysis() {
   const { t, lang } = useI18n();
   const analyze = useServerFn(analyzeReviewsFn);
+  const { paid } = usePlan();
   const [products, setProducts] = useState<Competitor[]>([
     { id: crypto.randomUUID(), name: "", reviews: "" },
   ]);
@@ -132,7 +134,12 @@ export function CompetitorAnalysis() {
       );
     } catch (e) {
       const msg = e instanceof Error ? e.message : t("panels.competitor.error");
-      const friendly = msg === "RATE_LIMIT_DAILY" ? t("panels.competitor.rate_limit") : msg;
+      const friendly =
+        msg === "RATE_LIMIT_DAILY"
+          ? t("panels.competitor.rate_limit")
+          : msg === "AI_BUSY"
+            ? t("errors.ai_busy")
+            : msg;
       setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, loading: false, error: friendly } : p)));
     }
   };
@@ -180,12 +187,16 @@ export function CompetitorAnalysis() {
         <h2>
           <span className="icon-lead">📊</span> {t("panels.competitor.h2")}
         </h2>
-        <button
-          className="btn btn-outline btn-sm"
-          onClick={() => setProducts((p) => [...p, { id: crypto.randomUUID(), name: "", reviews: "" }])}
-        >
-          + {t("panels.competitor.add_product")}
-        </button>
+        {paid ? (
+          <button
+            className="btn btn-outline btn-sm"
+            onClick={() => setProducts((p) => [...p, { id: crypto.randomUUID(), name: "", reviews: "" }])}
+          >
+            + {t("panels.competitor.add_product")}
+          </button>
+        ) : (
+          <UpgradeButton label={t("panels.competitor.add_product")} title={t("plan.multi_locked")} />
+        )}
       </div>
 
       {products.map((p, idx) => (
@@ -240,9 +251,13 @@ export function CompetitorAnalysis() {
                 </button>
                 {p.result && (
                   <>
-                    <button className="btn btn-outline" onClick={() => exportPdf(p.id, p.name)} disabled={exporting === p.id}>
-                      📄 {exporting === p.id ? "…" : t("panels.competitor.export_pdf")}
-                    </button>
+                    {paid ? (
+                      <button className="btn btn-outline" onClick={() => exportPdf(p.id, p.name)} disabled={exporting === p.id}>
+                        📄 {exporting === p.id ? "…" : t("panels.competitor.export_pdf")}
+                      </button>
+                    ) : (
+                      <UpgradeButton label={t("panels.competitor.export_pdf")} title={t("plan.pdf_locked")} />
+                    )}
                     <button className="btn btn-outline" onClick={() => exportCsv(p)}>
                       📊 {t("actions.export_csv")}
                     </button>

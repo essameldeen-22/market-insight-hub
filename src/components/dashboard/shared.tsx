@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import type { ReactNode } from "react";
+import { Link } from "@tanstack/react-router";
 
 export function Card({
   title,
@@ -81,4 +82,13 @@ export function fmtPct(n: number, digits = 1): string {
     maximumFractionDigits: digits,
     minimumFractionDigits: digits,
   }).format(n);
+}
+
+// Upgrade prompt shown in place of a Pro-only action on the free plan.
+export function UpgradeButton({ label, title }: { label: string; title?: string }) {
+  return (
+    <Link to="/pricing" className="btn btn-outline btn-sm" title={title}>
+      🔒 {label}
+    </Link>
+  );
 }
