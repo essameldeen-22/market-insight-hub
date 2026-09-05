@@ -139,7 +139,9 @@ export function CompetitorAnalysis() {
           ? t("panels.competitor.rate_limit")
           : msg === "AI_BUSY"
             ? t("errors.ai_busy")
-            : msg;
+            : msg === "PLAN_MULTI_PRODUCT"
+              ? t("plan.multi_locked")
+              : msg;
       setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, loading: false, error: friendly } : p)));
     }
   };
@@ -150,6 +152,8 @@ export function CompetitorAnalysis() {
     setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, name: pick.name, reviews: pick.reviews.join("\n") } : p)));
   };
 
+  // Known, accepted limitation: PDF export runs entirely in the browser, so the
+  // plan gate below is UI only. Low risk: the data is the user's own analysis.
   const exportPdf = async (id: string, name: string) => {
     const el = reportRefs.current[id];
     if (!el) return;

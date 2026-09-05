@@ -5,6 +5,8 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { AnalysisResult } from "./claude.server";
 import { isRateLimited } from "./rate-limit";
 import { bumpUsage, currentUsage } from "./usage";
+import { dayKey } from "./rate-limit";
+import { normalizePlan } from "./plan-limits";
 
 const AnalyzeInput = z.object({
   productName: z.string().max(200).default(""),
@@ -52,15 +54,31 @@ export const analyzeReviewsFn = createServerFn({ method: "POST" })
       throw new Error("RATE_LIMIT_DAILY");
     }
 
-    // 3. Shared site-wide budget gate (Gemini free tier is a project-wide pool).
+    // 3. Plan gate: multi-product comparison is a paid feature. Enforced here
+    // (not just in the UI) so a direct call cannot analyse a second product.
+    if (normalizePlan(usage.plan) === "free") {
+      const { data: todays } = await context.supabase
+        .from("competitor_analyses")
+        .select("product_name")
+        .eq("user_id", uid)
+        .gte("created_at", `${dayKey()}T00:00:00Z`);
+      const others = new Set(
+        (todays ?? [])
+          .map((r: { product_name: string | null }) => (r.product_name ?? "").trim().toLowerCase())
+          .filter((n: string) => n && n !== data.productName.trim().toLowerCase()),
+      );
+      if (others.size > 0) throw new Error("PLAN_MULTI_PRODUCT");
+    }
+
+    // 4. Shared site-wide budget gate (Gemini free tier is a project-wide pool).
     const { assertGlobalBudget, bumpGlobalUsage } = await import("./global-budget.server");
     const globalTotal = await assertGlobalBudget();
 
-    // 4. Real analysis.
+    // 5. Real analysis.
     const { analyzeReviews } = await import("./claude.server");
     const result = await analyzeReviews(data.productName, data.reviews);
 
-    // 5. Persist + previous lookup (before insert so we don't get "self").
+    // 6. Persist + previous lookup (before insert so we don't get "self").
     const previous = await loadPrevious(context.supabase, uid, data.productName, hash);
     try {
       await context.supabase.from("competitor_analyses").insert({
@@ -74,7 +92,7 @@ export const analyzeReviewsFn = createServerFn({ method: "POST" })
       console.error("Failed to persist analysis:", e);
     }
 
-    // 6. Bump usage counters.
+    // 7. Bump usage counters.
     await bumpUsage(context.supabase, uid, usage.count);
     await bumpGlobalUsage(globalTotal);
 
