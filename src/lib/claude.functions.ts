@@ -6,7 +6,7 @@ import type { AnalysisResult } from "./claude.server";
 import { isRateLimited } from "./rate-limit";
 import { bumpUsage, currentUsage } from "./usage";
 import { dayKey } from "./rate-limit";
-import { isPaidPlan } from "./use-plan";
+import { normalizePlan } from "./plan-limits";
 
 const AnalyzeInput = z.object({
   productName: z.string().max(200).default(""),
@@ -56,7 +56,7 @@ export const analyzeReviewsFn = createServerFn({ method: "POST" })
 
     // 3. Plan gate: multi-product comparison is a paid feature. Enforced here
     // (not just in the UI) so a direct call cannot analyse a second product.
-    if (!isPaidPlan(usage.plan)) {
+    if (normalizePlan(usage.plan) === "free") {
       const { data: todays } = await context.supabase
         .from("competitor_analyses")
         .select("product_name")
