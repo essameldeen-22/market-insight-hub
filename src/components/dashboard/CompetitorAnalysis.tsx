@@ -150,6 +150,8 @@ export function CompetitorAnalysis() {
     setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, name: pick.name, reviews: pick.reviews.join("\n") } : p)));
   };
 
+  // Known, accepted limitation: PDF export runs entirely in the browser, so the
+  // plan gate below is UI only. Low risk: the data is the user's own analysis.
   const exportPdf = async (id: string, name: string) => {
     const el = reportRefs.current[id];
     if (!el) return;
