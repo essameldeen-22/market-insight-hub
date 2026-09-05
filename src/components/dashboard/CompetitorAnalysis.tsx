@@ -139,7 +139,9 @@ export function CompetitorAnalysis() {
           ? t("panels.competitor.rate_limit")
           : msg === "AI_BUSY"
             ? t("errors.ai_busy")
-            : msg;
+            : msg === "PLAN_MULTI_PRODUCT"
+              ? t("plan.multi_locked")
+              : msg;
       setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, loading: false, error: friendly } : p)));
     }
   };
